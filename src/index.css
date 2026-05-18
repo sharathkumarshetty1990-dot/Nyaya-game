@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,300;1,400;1,600&family=Inter:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Playfair Display", serif;
+  
+  --color-ink: #141414;
+  --color-paper: #E4E3E0;
+  --color-line: #141414;
+  --color-accent: #D32F2F; /* Accent Red from theme */
+  --color-accent-green: #2E7D32;
+  --color-court: #2F2F2F; 
+  --color-paper-dark: #F0EFEA; /* Sidebar color from theme */
+  --color-card: #F9F9F9;
+}
+
+@layer base {
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+}
+
+@utility mono {
+  @apply font-mono uppercase tracking-wider text-[11px];
+}
+
+@utility serif-italic {
+  @apply font-serif italic;
+}
+
+@utility col-header {
+  @apply font-serif italic text-[11px] opacity-60 uppercase mb-2 border-b border-line pb-1 block;
+}
+
+/* Visibile structural borders as per Recipe 1 and High Density Theme */
+.grid-container {
+  @apply border-line border;
+}
+
+.grid-cell {
+  @apply border-line border p-4;
+}
+
+/* Judicial buttons with High Density styling */
+.btn-legal {
+  @apply mono px-4 py-2 border border-line bg-paper hover:bg-ink hover:text-paper transition-all duration-100 cursor-pointer disabled:opacity-30 flex items-center justify-center gap-2 font-bold;
+}
+
+.btn-primary {
+  @apply mono px-6 py-3 bg-ink text-paper border border-line hover:bg-paper hover:text-ink transition-all duration-100 cursor-pointer flex items-center justify-center gap-2 font-bold;
+}
+
+.btn-accent {
+  @apply mono px-6 py-3 bg-accent text-white border border-line hover:bg-white hover:text-accent transition-all duration-100 cursor-pointer flex items-center justify-center gap-2 font-bold uppercase tracking-widest;
+}
+
+.status-chip {
+  @apply text-[10px] px-2 py-1 border border-line uppercase font-bold;
+}
+
+.data-row {
+  @apply grid grid-cols-[1fr_auto] py-2 border-b border-black/10 font-mono text-[11px] leading-tight;
+}
+
+.score-bar {
+  @apply h-2 bg-black/10 border border-line mt-1 relative overflow-hidden;
+}
+
+.score-fill {
+  @apply h-full bg-ink transition-all duration-1000;
+}

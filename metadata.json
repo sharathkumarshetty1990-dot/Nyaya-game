@@ -1,0 +1,8 @@
+{
+  "name": "NYAYA: The Legal Justice Game",
+  "description": "An investigative legal thriller where you navigate India's new criminal laws (BNS, BNSS, BSA) to solve cases and deliver justice.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
