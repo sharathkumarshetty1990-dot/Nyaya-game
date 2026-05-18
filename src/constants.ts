@@ -1,6 +1,8 @@
-import { Case, Evidence, EvidenceStatus, EvidenceType, LawCard } from "./types";
+import { Case, Evidence, AuthenticityStatus, AdmissibilityStatus, EvidenceType, LawCard } from "./types";
+import { CASE_01 } from "./cases/case01";
 
 export const LAW_CARDS: LawCard[] = [
+  // ... existing law cards
   { 
     id: 'bns-318', 
     section: 'BNS 318', 
@@ -39,19 +41,7 @@ export const LAW_CARDS: LawCard[] = [
   },
 ];
 
-export const CASES: Case[] = [
-  {
-    id: 'case-01',
-    title: 'The Digital Arrest',
-    difficulty: 'Beginner',
-    description: 'A retired principal is trapped in a "digital arrest" by scammers posing as CBI. Save him and his savings.',
-    lawsTaught: ['BNS 318', 'BNS 308', 'BSA 63'],
-    initialNPCs: ['principal-lucknow', 'cbi-poser'],
-    evidenceIds: ['wa-ss', 'cbi-logo', 'newspaper-cji'],
-    availableBnsSections: ['BNS 318', 'BNS 308'],
-    narrativeUrgency: "The victim's bank account has been locked. Every hour delay risks the funds being moved offshore."
-  }
-];
+export const CASES: Case[] = [CASE_01];
 
 export const EVIDENCE_POOL: Evidence[] = [
   {
@@ -59,7 +49,9 @@ export const EVIDENCE_POOL: Evidence[] = [
     name: 'WhatsApp Call Screenshot',
     description: 'A screenshot showing the "+44" international number from the caller.',
     type: EvidenceType.DIGITAL,
-    status: EvidenceStatus.UNVERIFIED,
+    authenticity: AuthenticityStatus.UNVERIFIED,
+    admissibility: AdmissibilityStatus.PENDING,
+    courtConfidence: 0,
     hasBSACertificate: false,
     authenticityRisk: 'Timestamp may be manipulated',
     bsaSection: 'BSA 63',
@@ -72,7 +64,9 @@ export const EVIDENCE_POOL: Evidence[] = [
     name: 'CBI Logo on Uniform',
     description: 'Zoom frame grab showing a pixelated CBI logo on the fraudster\'s vest.',
     type: EvidenceType.DIGITAL,
-    status: EvidenceStatus.UNVERIFIED,
+    authenticity: AuthenticityStatus.UNVERIFIED,
+    admissibility: AdmissibilityStatus.PENDING,
+    courtConfidence: 0,
     hasBSACertificate: false,
     authenticityRisk: 'Compression artifacts detected',
     bsaSection: 'BSA 63',
@@ -83,7 +77,9 @@ export const EVIDENCE_POOL: Evidence[] = [
     name: 'Lucknow Times Clipping',
     description: 'Physical newspaper excerpt confirming the actual CJI was in New Delhi, not Lucknow.',
     type: EvidenceType.PHYSICAL,
-    status: EvidenceStatus.VERIFIED,
+    authenticity: AuthenticityStatus.VERIFIED,
+    admissibility: AdmissibilityStatus.ADMITTED,
+    courtConfidence: 100,
     hasBSACertificate: false,
     linkedEvidenceIds: [],
     supports: ['wa-ss']

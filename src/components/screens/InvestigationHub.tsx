@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameState, Case, Evidence, GamePhase, EvidenceStatus, EvidenceType } from '../../types';
+import { GameState, Case, Evidence, GamePhase, AuthenticityStatus, AdmissibilityStatus, EvidenceType } from '../../types';
 import { EVIDENCE_POOL } from '../../constants';
 import { GameEngine } from '../../game/gameEngine';
 import { 
@@ -34,9 +34,10 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
     setGameState(prev => ({
       ...prev,
       inventory: [...prev.inventory, evidence],
-      pressureMeter: Math.min(prev.pressureMeter + 2, 20)
+      pressureMeter: Math.min(prev.pressureMeter + 5, 100) // Finding evidence increases anticipation/pressure
     }));
   };
+
 
   const nextPhase = () => {
     const nextPhase = GameEngine.getNextPhase(gameState.phase);
@@ -200,15 +201,15 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
                            <span className="mono font-bold text-xs">{selectedEvidence.type}</span>
                         </div>
                         <div className="bg-paper-dark p-3 border border-line">
-                           <span className="mono text-[8px] opacity-40 font-bold block mb-1">Verification Status</span>
-                           <span className={`mono font-bold text-xs ${selectedEvidence.status === EvidenceStatus.CERTIFIED ? 'text-accent-green' : 'text-accent'}`}>{selectedEvidence.status}</span>
+                           <span className="mono text-[8px] opacity-40 font-bold block mb-1">Admissibility Status</span>
+                           <span className={`mono font-bold text-xs ${selectedEvidence.admissibility === AdmissibilityStatus.ADMITTED ? 'text-accent-green' : 'text-accent'}`}>{selectedEvidence.admissibility}</span>
                         </div>
                      </div>
 
                      <div className="p-5 border-2 border-accent border-dashed bg-accent/5 mt-4">
                         <div className="flex items-center gap-2 mb-2 text-accent">
                            <AlertTriangle size={14} />
-                           <span className="mono text-[9px] font-bold uppercase tracking-widest">Critical Vulnerability</span>
+                           <span className="mono text-[9px] font-bold uppercase tracking-widest">Confidence Score: {selectedEvidence.courtConfidence}%</span>
                         </div>
                         <p className="text-xs md:text-sm italic leading-tight text-accent font-medium">"{selectedEvidence.authenticityRisk || "Incipient artifact authentication pending deep-packet metadata scan."}"</p>
                      </div>

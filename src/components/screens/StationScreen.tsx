@@ -104,14 +104,17 @@ export default function StationScreen({ gameState, setGameState, currentCase }: 
                     {fricitionStep === 0 && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                         <p className="text-xl md:text-3xl font-serif italic leading-snug tracking-tight text-ink/90">
-                          "This is a digital matter. Our station doesn't have the capacity for international calls. You're better off in New Delhi."
+                          "Look, I've got three domestic disputes and a buffalo theft to settle today. This 'Digital Arrest' thing... it sounds like a movie plot. Unless you've got a Supreme Court order, I'm not touching this 'invisible' crime."
                         </p>
                         <div className="mt-8 md:mt-12 space-y-3">
                           <button 
-                            onClick={() => setFrictionStep(1)}
+                            onClick={() => {
+                                setFrictionStep(1);
+                                setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 10) }));
+                            }}
                             className="btn-accent w-full py-4 justify-between group active:scale-[0.98] transition-transform"
                           >
-                            <span className="text-[10px] tracking-widest font-bold">INVOKE_SEC_173_ZERO_FIR</span>
+                            <span className="text-[10px] tracking-widest font-bold">INVOKE_BNSS_SEC_173_(ZERO_FIR)</span>
                             <ChevronRight size={14} />
                           </button>
                         </div>
@@ -121,8 +124,9 @@ export default function StationScreen({ gameState, setGameState, currentCase }: 
                     {fricitionStep === 1 && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                         <p className="text-xl md:text-3xl font-serif italic leading-snug tracking-tight text-accent">
-                          "Fine. I'll take it under Zero FIR procedure. But choose carefully... if it's bailable, he's out in hours."
+                          "Zero FIR, eh? You've been reading the new codes. Fine. But if I register a BNS 318 and the guy is just a prankster, your name is on the report too. Pick your poison, 'detective'."
                         </p>
+
                         
                         <div className="mt-8 md:mt-12 space-y-6">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

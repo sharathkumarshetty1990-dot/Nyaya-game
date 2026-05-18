@@ -1,8 +1,8 @@
-import { GameState } from '../types';
+import { GameState, AuthenticityStatus } from '../types';
 
 export const calculateLegalScore = (state: GameState): number => {
   let score = 0;
-  const verifiedCount = state.inventory.filter(e => e.status !== 'UNVERIFIED').length;
+  const verifiedCount = state.inventory.filter(e => e.authenticity !== AuthenticityStatus.UNVERIFIED).length;
   const bsaCount = state.inventory.filter(e => e.hasBSACertificate).length;
   
   score = (verifiedCount * 10) + (bsaCount * 15);
@@ -10,5 +10,5 @@ export const calculateLegalScore = (state: GameState): number => {
 };
 
 export const calculateJusticeScore = (state: GameState): number => {
-  return Math.min(state.pressureMeter * 5, 100);
+  return Math.min(state.justiceScore || 0, 100);
 };

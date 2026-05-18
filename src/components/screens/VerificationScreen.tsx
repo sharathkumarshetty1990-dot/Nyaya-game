@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameState, Evidence, EvidenceStatus } from '../../types';
+import { GameState, Evidence, AuthenticityStatus, AdmissibilityStatus } from '../../types';
 import { GameEngine } from '../../game/gameEngine';
 import { 
   Fingerprint, 
@@ -39,7 +39,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
       {/* Evidence Strip - Scrollable */}
       <div className="h-14 md:h-16 border-b-2 border-line flex bg-white overflow-x-auto shrink-0 touch-pan-x">
         {gameState.inventory.map((item, idx) => (
-          <button
+            <button
             key={item.id}
             onClick={() => setSelectedEvidenceIdx(idx)}
             className={`min-w-[140px] md:min-w-48 border-r border-line p-3 md:p-4 flex flex-col justify-center transition-colors text-left shrink-0 ${
@@ -47,7 +47,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
             }`}
           >
             <span className="mono text-[9px] md:text-[10px] font-bold truncate w-full">{item.name}</span>
-            <span className={`mono text-[7px] md:text-[8px] italic ${idx === selectedEvidenceIdx ? 'opacity-60' : 'opacity-40'}`}>{item.status}</span>
+            <span className={`mono text-[7px] md:text-[8px] italic ${idx === selectedEvidenceIdx ? 'opacity-60' : 'opacity-40'}`}>{item.authenticity}</span>
           </button>
         ))}
         {gameState.inventory.length === 0 && (
@@ -64,16 +64,22 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
             <div className="max-w-4xl mx-auto flex flex-col gap-8">
               <div className="space-y-8">
                 <div className="border-2 border-line p-6 md:p-8 bg-paper-dark shadow-[4px_4px_0px_0px_rgba(20,20,20,1)]">
-                  <h2 className="mono font-bold text-lg md:text-xl mb-6 md:mb-8 flex items-center gap-3 border-b border-line pb-2">
-                    <Binary className="text-accent" size={18} />
-                    FORENSIC_SUITE
-                  </h2>
+                  <div className="flex justify-between items-start mb-6 md:mb-8 border-b border-line pb-2">
+                    <h2 className="mono font-bold text-lg md:text-xl flex items-center gap-3">
+                      <Binary className="text-accent" size={18} />
+                      FORENSIC_SUITE
+                    </h2>
+                    <div className="text-right">
+                       <div className="mono text-[8px] opacity-40 uppercase">Court Confidence</div>
+                       <div className="mono text-lg font-bold text-accent">{selectedEvidence.courtConfidence}%</div>
+                    </div>
+                  </div>
 
                   <div className="space-y-8 md:space-y-10">
                     <VerificationModule 
                       title="SHA-256 HASH VERIFICATION"
-                      status={selectedEvidence.status === EvidenceStatus.UNVERIFIED ? 'PENDING' : 'COMPLETED'}
-                      onVerify={() => updateEvidence(selectedEvidence.id, GameEngine.verifyEvidence(selectedEvidence))}
+                      status={selectedEvidence.authenticity === AuthenticityStatus.UNVERIFIED ? 'PENDING' : 'COMPLETED'}
+                      onVerify={() => updateEvidence(selectedEvidence.id, GameEngine.verifyEvidence(selectedEvidence, gameState))}
                     >
                       <div className="bg-ink p-3 md:p-4 border border-line text-[10px] md:text-[11px] mono text-accent-green font-bold space-y-2 overflow-hidden leading-snug">
                         <div className="opacity-40 uppercase tracking-tighter">Target Hash</div>
@@ -81,27 +87,28 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                         <div className="border-t border-accent-green/20 pt-2 opacity-40 uppercase tracking-tighter">
                           Calc Hash
                         </div>
-                        <div className="break-all">7A5D812CF9E42B0102...</div>
+                        <div className="break-all px-2 py-1 bg-white/5">0x_{selectedEvidence.id}_SHA_SECURED</div>
                       </div>
                     </VerificationModule>
 
                     <VerificationModule 
                       title="BSA SEC 63 CERTIFICATION"
-                      status={selectedEvidence.hasBSACertificate ? 'CERTIFIED' : 'UNCERTIFIED'}
+                      status={selectedEvidence.admissibility === AdmissibilityStatus.ADMITTED ? 'CERTIFIED' : 'UNCERTIFIED'}
                       onVerify={() => updateEvidence(selectedEvidence.id, GameEngine.certifyEvidence(selectedEvidence))}
-                      disabled={selectedEvidence.status === EvidenceStatus.UNVERIFIED}
+                      disabled={selectedEvidence.authenticity === AuthenticityStatus.UNVERIFIED}
                     >
                       <div className="bg-white border border-line p-3 md:p-4 flex items-center gap-3 md:gap-4">
                         <Stamp size={20} className="text-accent opacity-20" />
                         <div className="flex-1">
-                           <span className="mono text-[8px] font-bold block mb-1">LEGAL MANDATE</span>
-                           <p className="text-[9px] md:text-[10px] opacity-60 leading-tight italic">Digital signature linkage confirmed.</p>
+                           <span className="mono text-[8px] font-bold block mb-1">LEGAL MANDATE // {selectedEvidence.bsaSection || 'BSA'}</span>
+                           <p className="text-[9px] md:text-[10px] opacity-60 leading-tight italic">Digital signature linkage confirmed with local precinct certificate authority.</p>
                         </div>
                       </div>
                     </VerificationModule>
                   </div>
                 </div>
               </div>
+
 
               {/* Preview & Info - Responsive Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 md:gap-8">

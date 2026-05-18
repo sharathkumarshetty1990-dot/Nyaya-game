@@ -18,11 +18,18 @@ export enum EvidenceType {
   TESTIMONY = 'TESTIMONY'
 }
 
-export enum EvidenceStatus {
+export enum AuthenticityStatus {
   UNVERIFIED = 'UNVERIFIED',
   VERIFIED = 'VERIFIED',
-  CERTIFIED = 'CERTIFIED', // BSA Sec 63
-  CONTESTED = 'CONTESTED'
+  FORGED = 'FORGED',
+  TAMPERED = 'TAMPERED'
+}
+
+export enum AdmissibilityStatus {
+  INADMISSIBLE = 'INADMISSIBLE',
+  PENDING = 'PENDING',
+  ADMITTED = 'ADMITTED',
+  SUPPRESSED = 'SUPPRESSED'
 }
 
 export interface DigitalEvidenceMetadata {
@@ -50,7 +57,9 @@ export interface Evidence {
   name: string;
   description: string;
   type: EvidenceType;
-  status: EvidenceStatus;
+  authenticity: AuthenticityStatus;
+  admissibility: AdmissibilityStatus;
+  courtConfidence: number; // 0-100
   hasBSACertificate: boolean;
   metadata?: DigitalEvidenceMetadata | PhysicalEvidenceMetadata | TestimonyMetadata;
   authenticityRisk?: string;
@@ -83,6 +92,18 @@ export interface NPC {
   avatarUrl?: string;
 }
 
+export interface TrialStep {
+  id: string;
+  type: 'statement' | 'objection' | 'evidence_request' | 'verdict_moment';
+  speaker: string;
+  text: string;
+  options?: string[];
+  requiredEvidenceIds?: string[];
+  contradictionEvidenceId?: string;
+  impactOnPressure?: number;
+  impactOnJustice?: number;
+}
+
 export interface Case {
   id: string;
   title: string;
@@ -92,7 +113,8 @@ export interface Case {
   initialNPCs: string[];
   evidenceIds: string[];
   availableBnsSections: string[];
-  narrativeUrgency?: string; // Replaces maxActions
+  narrativeUrgency?: string; 
+  trialFlow: TrialStep[];
 }
 
 export interface GameState {
@@ -104,7 +126,7 @@ export interface GameState {
   unlockedLawCards: string[];
   completedCases: string[];
   npcTrust: Record<string, number>;
-  pressureMeter: number;
+  pressureMeter: number; // 0-100, affects courtroom tension
   currentStationOfficer?: string;
   isGameOver: boolean;
 }
