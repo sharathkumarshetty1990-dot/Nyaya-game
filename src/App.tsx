@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GamePhase, GameState, Evidence, Case } from './types';
+import { GamePhase, GameState } from './types';
 import { CASES } from './constants';
+import { GameEngine } from './game/gameEngine';
 import HomeScreen from './components/screens/HomeScreen';
 import BriefingScreen from './components/screens/BriefingScreen';
 import InvestigationHub from './components/screens/InvestigationHub';
@@ -9,14 +10,13 @@ import VerificationScreen from './components/screens/VerificationScreen';
 import StationScreen from './components/screens/StationScreen';
 import CourtroomScreen from './components/screens/CourtroomScreen';
 import VerdictScreen from './components/screens/VerdictScreen';
-import { Gavel, Scale, FileText } from 'lucide-react';
+import { Scale } from 'lucide-react';
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState>({
     currentCaseId: null,
     phase: GamePhase.BRIEFING,
     inventory: [],
-    actionTokens: 0,
     legalScore: 0,
     justiceScore: 0,
     unlockedLawCards: [],
@@ -38,7 +38,6 @@ export default function App() {
       currentCaseId: caseId,
       phase: GamePhase.BRIEFING,
       inventory: [],
-      actionTokens: selectedCase.maxActions,
       legalScore: 0,
       justiceScore: 0,
       pressureMeter: 0,
@@ -46,8 +45,9 @@ export default function App() {
     setIsGameStarted(true);
   };
 
-  const nextPhase = (phase: GamePhase) => {
-    setGameState(prev => ({ ...prev, phase }));
+  const nextPhase = () => {
+    const nextPhase = GameEngine.getNextPhase(gameState.phase);
+    setGameState(prev => ({ ...prev, phase: nextPhase }));
   };
 
   const currentCase = CASES.find(c => c.id === gameState.currentCaseId);
@@ -92,7 +92,7 @@ export default function App() {
               {gameState.phase === GamePhase.BRIEFING && currentCase && (
                 <BriefingScreen 
                   caseData={currentCase} 
-                  onConfirm={() => nextPhase(GamePhase.INVESTIGATION)} 
+                  onConfirm={nextPhase} 
                 />
               )}
               {gameState.phase === GamePhase.INVESTIGATION && currentCase && (
@@ -136,14 +136,10 @@ export default function App() {
 
       <footer className="h-[60px] md:h-[80px] border-t-2 border-line flex items-center px-4 md:px-8 justify-between shrink-0 bg-white z-20">
         <div className="flex items-center gap-4">
-           {gameState.phase === GamePhase.STATION ? (
-              <button className="btn-primary h-10 md:h-12 px-6 md:px-10 text-[10px] md:text-xs">FILE FIR</button>
-           ) : (
-              <div className="mono text-[9px] md:text-[10px] opacity-40 leading-tight">
-                 LOOP: VERIFY &gt; FILE &gt; COURT<br />
-                 {gameState.phase}_PHASE
-              </div>
-           )}
+          <div className="mono text-[9px] md:text-[10px] opacity-40 leading-tight">
+             LOOP: VERIFY &gt; FILE &gt; COURT<br />
+             {gameState.phase}_PHASE
+          </div>
         </div>
         <div className="text-right">
            <div className="mono text-[9px] md:text-[10px] opacity-30 font-bold uppercase tracking-widest leading-none">NYAYA_CORE</div>

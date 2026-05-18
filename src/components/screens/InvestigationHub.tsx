@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameState, Case, Evidence, GamePhase, EvidenceStatus, EvidenceType } from '../../types';
-import { INITIAL_EVIDENCE } from '../../constants';
+import { EVIDENCE_POOL } from '../../constants';
+import { GameEngine } from '../../game/gameEngine';
 import { 
   Scale,
   FileSearch, 
@@ -25,21 +26,21 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null);
 
   const collectEvidence = (evidenceId: string) => {
-    if (gameState.actionTokens <= 0) return;
     if (gameState.inventory.some(e => e.id === evidenceId)) return;
 
-    const evidence = INITIAL_EVIDENCE[evidenceId];
+    const evidence = EVIDENCE_POOL.find(e => e.id === evidenceId);
     if (!evidence) return;
 
     setGameState(prev => ({
       ...prev,
-      actionTokens: prev.actionTokens - 1,
-      inventory: [...prev.inventory, evidence]
+      inventory: [...prev.inventory, evidence],
+      pressureMeter: Math.min(prev.pressureMeter + 2, 20)
     }));
   };
 
   const nextPhase = () => {
-    setGameState(prev => ({ ...prev, phase: GamePhase.VERIFICATION }));
+    const nextPhase = GameEngine.getNextPhase(gameState.phase);
+    setGameState(prev => ({ ...prev, phase: nextPhase }));
   };
 
   const selectedEvidence = gameState.inventory.find(e => e.id === selectedEvidenceId);
@@ -48,16 +49,13 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
     <div className="flex-1 flex flex-col bg-paper relative overflow-hidden">
       {/* Top Stats Bar - Responsive */}
       <div className="bg-white border-b border-line px-4 py-3 flex justify-between items-center shrink-0 z-10 shadow-sm">
-         <div className="flex flex-col">
-            <span className="mono text-[9px] opacity-40 font-bold uppercase leading-none mb-1 tracking-widest">Action Reserve</span>
-            <div className="flex items-center gap-2">
-               <div className="flex gap-1">
-                 {[...Array(currentCase.maxActions)].map((_, i) => (
-                   <div key={i} className={`h-3 w-1.5 border border-line/20 ${i < gameState.actionTokens ? 'bg-accent' : 'bg-paper-dark'}`} />
-                 ))}
-               </div>
-               <span className="mono font-bold text-xs">{gameState.actionTokens}/{currentCase.maxActions}</span>
-            </div>
+         <div className="flex flex-col max-w-[60%]">
+            <span className="mono text-[9px] opacity-40 font-bold uppercase leading-none mb-1 tracking-widest text-accent flex items-center gap-2">
+               <AlertTriangle size={10} /> Case Urgency
+            </span>
+            <p className="mono font-bold text-[10px] md:text-sm leading-tight truncate md:whitespace-normal md:overflow-visible">
+               {currentCase.narrativeUrgency}
+            </p>
          </div>
          <button 
            onClick={nextPhase}

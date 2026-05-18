@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameState, Case, GamePhase, EvidenceStatus } from '../../types';
+import { GameState, Case, EvidenceStatus } from '../../types';
+import { GameEngine } from '../../game/gameEngine';
 import { 
   Gavel, 
   Scale, 
@@ -41,7 +42,8 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
         setShowContradiction(true);
       }
     } else {
-        setGameState(prev => ({ ...prev, phase: GamePhase.VERDICT }));
+        const nextPhase = GameEngine.getNextPhase(gameState.phase);
+        setGameState(prev => ({ ...prev, phase: nextPhase }));
     }
   };
 

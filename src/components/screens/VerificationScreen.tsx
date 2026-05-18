@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameState, Evidence, EvidenceStatus, GamePhase } from '../../types';
+import { GameState, Evidence, EvidenceStatus } from '../../types';
+import { GameEngine } from '../../game/gameEngine';
 import { 
   Fingerprint, 
   ShieldCheck, 
@@ -29,7 +30,8 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
   };
 
   const nextPhase = () => {
-    setGameState(prev => ({ ...prev, phase: GamePhase.STATION }));
+    const nextPhase = GameEngine.getNextPhase(gameState.phase);
+    setGameState(prev => ({ ...prev, phase: nextPhase }));
   };
 
   return (
@@ -71,7 +73,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                     <VerificationModule 
                       title="SHA-256 HASH VERIFICATION"
                       status={selectedEvidence.status === EvidenceStatus.UNVERIFIED ? 'PENDING' : 'COMPLETED'}
-                      onVerify={() => updateEvidence(selectedEvidence.id, { status: EvidenceStatus.VERIFIED })}
+                      onVerify={() => updateEvidence(selectedEvidence.id, GameEngine.verifyEvidence(selectedEvidence))}
                     >
                       <div className="bg-ink p-3 md:p-4 border border-line text-[10px] md:text-[11px] mono text-accent-green font-bold space-y-2 overflow-hidden leading-snug">
                         <div className="opacity-40 uppercase tracking-tighter">Target Hash</div>
@@ -86,7 +88,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                     <VerificationModule 
                       title="BSA SEC 63 CERTIFICATION"
                       status={selectedEvidence.hasBSACertificate ? 'CERTIFIED' : 'UNCERTIFIED'}
-                      onVerify={() => updateEvidence(selectedEvidence.id, { hasBSACertificate: true, status: EvidenceStatus.CERTIFIED })}
+                      onVerify={() => updateEvidence(selectedEvidence.id, GameEngine.certifyEvidence(selectedEvidence))}
                       disabled={selectedEvidence.status === EvidenceStatus.UNVERIFIED}
                     >
                       <div className="bg-white border border-line p-3 md:p-4 flex items-center gap-3 md:gap-4">

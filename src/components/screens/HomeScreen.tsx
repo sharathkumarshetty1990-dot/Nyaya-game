@@ -39,9 +39,10 @@ export default function HomeScreen({ onStartCase }: HomeScreenProps) {
 
                 <div className="space-y-3 md:space-y-4 border-t border-line pt-4 md:pt-6">
                    <div className="data-row border-none p-0 flex justify-between items-center">
-                      <span className="opacity-40 uppercase text-[9px] md:text-[10px] mono font-bold tracking-widest text-[8px] md:text-[10px]">Complexity:</span>
+                      <span className="opacity-40 uppercase text-[9px] md:text-[10px] mono font-bold tracking-widest text-[8px] md:text-[10px]">Difficulty:</span>
                       <div className="flex gap-1">
-                        {[...Array(caseItem.complexity)].map((_, i) => (
+                        {/* Map difficulty string to numeric blocks */}
+                        {[...Array(caseItem.difficulty === 'Beginner' ? 1 : caseItem.difficulty === 'Intermediate' ? 2 : 3)].map((_, i) => (
                           <div key={i} className="w-1 md:w-1.5 h-3 md:h-4 bg-accent" />
                         ))}
                       </div>

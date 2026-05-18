@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameState, Case, GamePhase } from '../../types';
+import { GameState, Case } from '../../types';
+import { GameEngine } from '../../game/gameEngine';
 import { 
   Building2, 
   UserCircle2, 
@@ -40,7 +41,8 @@ export default function StationScreen({ gameState, setGameState, currentCase }: 
   };
 
   const nextPhase = () => {
-    setGameState(prev => ({ ...prev, phase: GamePhase.COURTROOM }));
+    const nextPhase = GameEngine.getNextPhase(gameState.phase);
+    setGameState(prev => ({ ...prev, phase: nextPhase }));
   };
 
   return (

@@ -25,6 +25,26 @@ export enum EvidenceStatus {
   CONTESTED = 'CONTESTED'
 }
 
+export interface DigitalEvidenceMetadata {
+  hash: string;
+  timestamp: string;
+  deviceOrigin: string;
+  fileSize?: string;
+  format?: string;
+}
+
+export interface PhysicalEvidenceMetadata {
+  locationFound: string;
+  custodyChain: string[];
+  dimensions?: string;
+}
+
+export interface TestimonyMetadata {
+  witnessId: string;
+  reliabilityScore: number;
+  dateOfStatement: string;
+}
+
 export interface Evidence {
   id: string;
   name: string;
@@ -32,10 +52,16 @@ export interface Evidence {
   type: EvidenceType;
   status: EvidenceStatus;
   hasBSACertificate: boolean;
-  metadata?: Record<string, any>;
+  metadata?: DigitalEvidenceMetadata | PhysicalEvidenceMetadata | TestimonyMetadata;
   authenticityRisk?: string;
   bsaSection?: string;
-  contentUrl?: string; // For images/documents
+  contentUrl?: string;
+  
+  // Relational Depth
+  linkedEvidenceIds: string[];
+  contradicts?: string[];
+  supports?: string[];
+  requires?: string[];
 }
 
 export interface LawCard {
@@ -43,8 +69,9 @@ export interface LawCard {
   section: string;
   title: string;
   description: string;
-  cases: string[]; // IDs of cases it pertains to
+  cases: string[];
   tier: 'BNS' | 'BNSS' | 'BSA';
+  effect?: string; // Tactical impact description
 }
 
 export interface NPC {
@@ -65,18 +92,17 @@ export interface Case {
   initialNPCs: string[];
   evidenceIds: string[];
   availableBnsSections: string[];
-  maxActions: number;
+  narrativeUrgency?: string; // Replaces maxActions
 }
 
 export interface GameState {
   currentCaseId: string | null;
   phase: GamePhase;
   inventory: Evidence[];
-  actionTokens: number;
   legalScore: number;
   justiceScore: number;
-  unlockedLawCards: string[]; // IDs
-  completedCases: string[]; // IDs
+  unlockedLawCards: string[];
+  completedCases: string[];
   npcTrust: Record<string, number>;
   pressureMeter: number;
   currentStationOfficer?: string;
