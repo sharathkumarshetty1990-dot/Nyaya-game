@@ -71,3 +71,28 @@
 .score-fill {
   @apply h-full bg-ink transition-all duration-1000;
 }
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10%, 50%, 90% { transform: translate(-1px, 1.5px) rotate(-0.5deg); }
+  20%, 60% { transform: translate(1px, -1px) rotate(0.5deg); }
+  30%, 70% { transform: translate(-1.5px, -0.5px) rotate(0deg); }
+  40%, 80% { transform: translate(1.5px, 1.5px) rotate(0.5deg); }
+}
+
+@keyframes glitch-flickers {
+  0%, 100% { filter: hue-rotate(0deg) contrast(1); opacity: 1; }
+  23% { filter: hue-rotate(20deg) contrast(1.1); }
+  24% { filter: hue-rotate(-10deg) brightness(1.2); opacity: 0.9; }
+  26% { filter: none; opacity: 1; }
+  67% { filter: blur(0.3px) red; }
+  68% { filter: none; }
+}
+
+.animate-shake {
+  animation: shake 0.2s infinite;
+}
+
+.animate-glitch {
+  animation: glitch-flickers 1s infinite steps(2);
+}

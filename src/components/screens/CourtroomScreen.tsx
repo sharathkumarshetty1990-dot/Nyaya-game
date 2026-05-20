@@ -40,16 +40,22 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
 
   // Helper to determine modified dialogue on high pressure (adds narrative texture)
   const getDynamicDialogue = (speaker: string, originalText: string) => {
-    if (gameState.pressureMeter > 60) {
+    if (gameState.pressureMeter > 50) {
       if (speaker === 'Virendra Sharma') {
-        return `*(Wiping cold sweat from his neck, his hands shaking)* "They know my house... they know my retired WhatsApp patterns! I... I always sign 'Regards, Principal Sharma,' and they used it to destroy my life's savings! Please, the tension is choking me..."`;
+        return `*(Wiping cold sweat from his neck, his hands shaking violently)* "... I... I can't focus. They... they said they were cyber officers with a direct warrant. Standard CBI Lucknow digital lockdown! My heart is pounding... I always sign my notes 'Regards, Principal Sharma' and they... they mapped it directly. Please, my chest is so tight..."`;
       }
       if (speaker === 'Justice G. Singh') {
-        return `*(Frowning sternly, his gavel raised threatingly)* "The courtroom atmosphere is deteriorating. Counsel, cut through the digital obfuscations or I will hold you in contempt! Proceed immediately!"`;
+        return `*(Slamming his gavel down with an aggressive crash, frowning sternly)* "Counsel! I will not tolerate further digital obfuscation or procedural delays. This court rules on strict evidentiary thresholds! Present a verified BSA 63 certificate or face immediate exclusion penalties!"`;
       }
       if (speaker === 'CBI Poser (Transcript)') {
-        return `*(Projected transcript scrolling rapidly)* "ALERT: IP packets originating from Sharma's address. State-level lockdown authorized by Amit Sen. Speed up the transfer before the cyber barracks logs reset!"`;
+        return `*(Digital transcript flickers rapidly)* "WARNING // BARRACKS LOCKDOWN INITIATED... ESCROW ROUTE SECURED under direct judicial mandate. LIQUIDATE PORTFOLIO IMMEDIATELY OR PREPARE FOR TWENTY-NINE YEARS OF RIGOROUS IMPRISONMENT."`;
       }
+      
+      // Generic dramatic stutter under high pressure context
+      return originalText
+        .replace(/ the /gi, ' ... the ')
+        .replace(/\. /g, '... I... ')
+        .toUpperCase() + " [PRESSURE LEVEL EXTREME]";
     }
     return originalText;
   };
@@ -220,8 +226,10 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     );
   };
 
+  const isUnderPressure = gameState.pressureMeter > 50;
+
   return (
-    <div className={`flex-1 flex flex-col bg-[#2A1810] overflow-hidden transition-colors duration-500 ${pressureAnim ? 'bg-red-900/20' : ''}`}>
+    <div className={`flex-1 flex flex-col bg-[#2A1810] overflow-hidden transition-all duration-500 ${isUnderPressure ? 'animate-shake animate-glitch border-4 border-red-900 shadow-[inset_0_0_80px_rgba(239,68,68,0.25)]' : ''} ${pressureAnim ? 'bg-red-900/20' : ''}`}>
       {/* Courtroom Header */}
       <div className="h-14 md:h-16 border-b-2 border-[#1A0D08] bg-[#3D251C] flex items-center px-4 md:px-8 justify-between shrink-0 text-amber-50 shadow-lg">
         <div className="flex items-center gap-3">
@@ -352,15 +360,28 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                         key={item.id}
                         className={`p-4 border-2 transition-all cursor-default ${GameEngine.isEvidenceAdmissible(item) ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.2)]' : 'bg-[#1A0D08]/50 border-[#5A3D2D]'}`}
                     >
-                        <div className="flex justify-between mb-2">
+                        <div className="flex justify-between mb-2 pb-1 border-b border-[#2A1810]">
                            <span className="mono text-[10px] font-bold text-amber-50 tracking-tighter">{item.name}</span>
                            <span className="mono text-[8px] opacity-40 uppercase">{item.type}</span>
                         </div>
-                        <div className="flex items-center justify-between text-[8px]">
+                        <div className="flex items-center justify-between text-[8px] mb-2">
                            <span className="mono text-amber-100/40 font-bold uppercase">{item.authenticity} // {item.admissibility}</span>
-                           <div className="flex items-center gap-1 text-accent font-bold">
-                             <TrendingDown size={10} />
-                             <span>{item.courtConfidence}%</span>
+                           <span className="mono text-amber-500 font-bold uppercase">{item.courtConfidence}% CONF</span>
+                        </div>
+                        
+                        {/* Three separate dimensions bar display */}
+                        <div className="grid grid-cols-3 gap-1 text-[7.5px] mono border-t border-amber-950/40 pt-1.5 opacity-80">
+                           <div>
+                              <span className="opacity-50">CR (Cred):</span>
+                              <span className="text-[#6FCF97] font-bold ml-0.5">{item.credibility || 30}%</span>
+                           </div>
+                           <div>
+                              <span className="opacity-50">AD (Proc):</span>
+                              <span className="text-[#66FCF1] font-bold ml-0.5">{item.admissibilityStrength || 10}%</span>
+                           </div>
+                           <div>
+                              <span className="opacity-50">SW (Sway):</span>
+                              <span className="text-[#DC3D2C] font-bold ml-0.5">{item.judgeImpact || 60}%</span>
                            </div>
                         </div>
                     </div>

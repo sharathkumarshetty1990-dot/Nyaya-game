@@ -5,17 +5,21 @@ import { Evidence, AuthenticityStatus, AdmissibilityStatus, GameState } from '..
  * Higher pressure level makes verification slightly harder or riskier.
  */
 export const verifyEvidence = (evidence: Evidence, state: GameState): Evidence => {
-  const pressurePenalty = state.pressureMeter > 50 ? 10 : 0;
+  const pressurePenalty = state.pressureMeter > 50 ? 15 : 0;
   
-  // Logical depth: if a supporting evidence is already verified, court confidence increases
+  // Logical depth: if supporting evidence is already verified, credibility increases
   const supportVerified = evidence.supports?.some(id => 
     state.inventory.find(e => e.id === id)?.authenticity === AuthenticityStatus.VERIFIED
   );
 
+  const newCredibility = Math.min(100, (evidence.credibility || 30) + (supportVerified ? 40 : 25) - pressurePenalty);
+  const newAdmissibilityStrength = evidence.admissibilityStrength || 10;
+
   return { 
     ...evidence, 
     authenticity: AuthenticityStatus.VERIFIED,
-    courtConfidence: Math.min(100, (evidence.courtConfidence || 50) + (supportVerified ? 20 : 10) - pressurePenalty)
+    credibility: newCredibility,
+    courtConfidence: Math.round(0.6 * newCredibility + 0.4 * newAdmissibilityStrength)
   };
 };
 
@@ -28,11 +32,15 @@ export const certifyEvidence = (evidence: Evidence): Evidence => {
     return evidence;
   }
 
+  const newCredibility = evidence.credibility || 50;
+  const newAdmissibilityStrength = Math.min(100, (evidence.admissibilityStrength || 10) + 75);
+
   return { 
     ...evidence, 
     admissibility: AdmissibilityStatus.ADMITTED, 
     hasBSACertificate: true,
-    courtConfidence: Math.min(100, (evidence.courtConfidence || 0) + 30)
+    admissibilityStrength: newAdmissibilityStrength,
+    courtConfidence: Math.round(0.6 * newCredibility + 0.4 * newAdmissibilityStrength)
   };
 };
 
