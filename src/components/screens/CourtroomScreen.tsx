@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameState, Case, AuthenticityStatus, AdmissibilityStatus } from '../../types';
+import { GameState, Case, AuthenticityStatus, AdmissibilityStatus, TrialStepOption, Evidence } from '../../types';
 import { GameEngine } from '../../game/gameEngine';
 import { 
   Gavel, 
   Scale, 
   Clock, 
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  ShieldAlert,
+  BookOpen,
+  AlertTriangle,
+  HelpCircle,
+  CheckCircle2,
+  XCircle,
+  TrendingDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface CourtroomScreenProps {
@@ -19,9 +27,32 @@ interface CourtroomScreenProps {
 export default function CourtroomScreen({ gameState, setGameState, currentCase }: CourtroomScreenProps) {
   const [step, setStep] = useState(0);
   const [showContradiction, setShowContradiction] = useState(false);
+  const [selectedContradictionId, setSelectedContradictionId] = useState<string | null>(null);
+  const [contradictionResult, setContradictionResult] = useState<{
+    status: 'success' | 'failure' | 'inadmissible' | null;
+    message: string;
+  }>({ status: null, message: '' });
+
+  const [selectedOptionOutcome, setSelectedOptionOutcome] = useState<TrialStepOption | null>(null);
   const [pressureAnim, setPressureAnim] = useState(false);
 
   const trialStep = currentCase.trialFlow[step];
+
+  // Helper to determine modified dialogue on high pressure (adds narrative texture)
+  const getDynamicDialogue = (speaker: string, originalText: string) => {
+    if (gameState.pressureMeter > 60) {
+      if (speaker === 'Virendra Sharma') {
+        return `*(Wiping cold sweat from his neck, his hands shaking)* "They know my house... they know my retired WhatsApp patterns! I... I always sign 'Regards, Principal Sharma,' and they used it to destroy my life's savings! Please, the tension is choking me..."`;
+      }
+      if (speaker === 'Justice G. Singh') {
+        return `*(Frowning sternly, his gavel raised threatingly)* "The courtroom atmosphere is deteriorating. Counsel, cut through the digital obfuscations or I will hold you in contempt! Proceed immediately!"`;
+      }
+      if (speaker === 'CBI Poser (Transcript)') {
+        return `*(Projected transcript scrolling rapidly)* "ALERT: IP packets originating from Sharma's address. State-level lockdown authorized by Amit Sen. Speed up the transfer before the cyber barracks logs reset!"`;
+      }
+    }
+    return originalText;
+  };
 
   const handleNextStep = () => {
     if (step < currentCase.trialFlow.length - 1) {
@@ -35,6 +66,8 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
 
       if (currentStep.contradictionEvidenceId) {
         setShowContradiction(true);
+        setSelectedContradictionId(null);
+        setContradictionResult({ status: null, message: '' });
       } else {
         setStep(step + 1);
       }
@@ -44,35 +77,145 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     }
   };
 
-  const handleContradictionSuccess = () => {
-    const contradictionEvidence = gameState.inventory.find(e => e.id === trialStep.contradictionEvidenceId);
-    
-    if (contradictionEvidence && GameEngine.isEvidenceAdmissible(contradictionEvidence)) {
-        setShowContradiction(false);
-        setStep(step + 1);
-        setGameState(prev => ({ 
-            ...prev, 
-            justiceScore: prev.justiceScore + 20,
-            pressureMeter: Math.max(0, prev.pressureMeter - 10)
-        }));
-    } else {
-        setGameState(prev => ({ ...prev, pressureMeter: prev.pressureMeter + 15 }));
+  const handleSelectOption = (opt: TrialStepOption) => {
+    // Check if the option requires specific evidence
+    if (opt.evidenceRequiredId) {
+      const hasItem = gameState.inventory.find(e => e.id === opt.evidenceRequiredId);
+      if (!hasItem) {
+        return; // Disabled click (safeguard)
+      }
+      if (opt.requiresBsaCertificate && !GameEngine.isEvidenceAdmissible(hasItem)) {
+        // If they try to choose it but the item is uncertified, they fail
+        setSelectedOptionOutcome({
+          ...opt,
+          id: 'failed-cert-option',
+          text: opt.text + " (PROCEDURAL FAILURE)",
+          outcomeDialogue: `Procedural Catastrophe! You tried to present the ${hasItem.name} but without a valid dual-signature certificate under BSA Section 63, the defense counselor objects instantly: 'Counsel relies on raw pixels with zero custody hash! Obvious statutory violation!' Justice G. Singh sustains, scolding you for frivolous digital submission.`,
+          impactOnPressure: 20,
+          impactOnJustice: -10,
+          impactOnLegal: -15
+        });
+        return;
+      }
+    }
+
+    setSelectedOptionOutcome(opt);
+  };
+
+  const confirmOptionOutcome = () => {
+    if (!selectedOptionOutcome) return;
+
+    setGameState(prev => {
+      const updatedTrust = { ...prev.npcTrust };
+      if (selectedOptionOutcome.npcTrustInfluence) {
+        const { npcId, amount } = selectedOptionOutcome.npcTrustInfluence;
+        updatedTrust[npcId] = Math.min(5, Math.max(0, (updatedTrust[npcId] || 0) + amount));
+      }
+      return {
+        ...prev,
+        legalScore: Math.min(100, prev.legalScore + selectedOptionOutcome.impactOnLegal),
+        justiceScore: Math.min(100, prev.justiceScore + selectedOptionOutcome.impactOnJustice),
+        pressureMeter: Math.min(100, Math.max(0, prev.pressureMeter + selectedOptionOutcome.impactOnPressure)),
+        npcTrust: updatedTrust
+      };
+    });
+
+    setSelectedOptionOutcome(null);
+    setStep(step + 1);
+  };
+
+  const handleExecuteContradiction = () => {
+    if (!selectedContradictionId) return;
+
+    const selectedItem = gameState.inventory.find(e => e.id === selectedContradictionId);
+    if (!selectedItem) return;
+
+    const correctId = trialStep.contradictionEvidenceId;
+
+    if (selectedContradictionId === correctId) {
+      // Correct item! Check if it's admissible
+      if (GameEngine.isEvidenceAdmissible(selectedItem)) {
+        setContradictionResult({
+          status: 'success',
+          message: `IMPEACHMENT SUCCESSFUL! You stand up and raise the ${selectedItem.name}. You demonstrate to the bench that on April 14th, the actual Chief Justice of India was presiding in New Delhi, making the 'cyber logs' claiming he was on a secret call from his chambers in Lucknow an absolute mathematical lie. The transcript witness is discredited!`
+        });
+      } else {
+        setContradictionResult({
+          status: 'inadmissible',
+          message: `PROCEDURAL REJECTION! You identified the correct contradiction—the ${selectedItem.name} demonstrates the CJI was in New Delhi. However, because this clipping is NOT yet admitted or authenticated into the judicial record, the Defense Counsel Objects: 'Counsel presents a newspaper that has not been verified! This violates the rules of custodial chain physical entry!' The judge sustains. The evidence remains inadmissible!`
+        });
+        setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
         setPressureAnim(true);
         setTimeout(() => setPressureAnim(false), 500);
+      }
+    } else {
+      // Incorrect item
+      setContradictionResult({
+        status: 'failure',
+        message: `MISTAKEN DEDUCTION! You present the ${selectedItem.name} to challenge Inspector Amit Sen's transcript log. The Defense Counsel scoffs: 'Counsel is shooting in the dark. How does this exhibit prove a scheduling anomaly?' Justice G. Singh shakes his head in deep irritation, warning you not to waste the court's time.`
+      });
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
+      setPressureAnim(true);
+      setTimeout(() => setPressureAnim(false), 500);
     }
   };
 
-  const renderOption = (opt: string) => {
+  const confirmContradictionClose = () => {
+    if (contradictionResult.status === 'success') {
+      setShowContradiction(false);
+      setStep(step + 1);
+      setGameState(prev => ({
+        ...prev,
+        justiceScore: Math.min(100, prev.justiceScore + 25),
+        pressureMeter: Math.max(0, prev.pressureMeter - 15)
+      }));
+    } else {
+      // Stay on screen to let them rewrite history or correct their mistake
+      setContradictionResult({ status: null, message: '' });
+      setSelectedContradictionId(null);
+    }
+  };
+
+  const renderOptionCard = (opt: TrialStepOption) => {
+    const isMissingEvidence = opt.evidenceRequiredId && !gameState.inventory.some(e => e.id === opt.evidenceRequiredId);
+    const requiredItem = opt.evidenceRequiredId ? gameState.inventory.find(e => e.id === opt.evidenceRequiredId) : null;
+    const isMissingCertification = opt.requiresBsaCertificate && requiredItem && !GameEngine.isEvidenceAdmissible(requiredItem);
+
     return (
       <button 
-        key={opt}
-        onClick={() => {
-            setGameState(prev => ({ ...prev, legalScore: prev.legalScore + 5 }));
-            setStep(step + 1);
-        }}
-        className="btn-legal bg-[#2A1810] text-amber-100/60 border-[#5A3D2D] hover:border-accent hover:text-white py-3 md:py-4 text-[10px] uppercase font-bold tracking-widest active:scale-95 transition-transform"
+        key={opt.id}
+        disabled={!!isMissingEvidence}
+        onClick={() => handleSelectOption(opt)}
+        className={`w-full flex flex-col p-4 md:p-5 border-2 text-left relative transition-all duration-300 hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] active:scale-98 ${
+          isMissingEvidence 
+            ? 'bg-[#1e130f] border-red-950/40 opacity-40 cursor-not-allowed'
+            : isMissingCertification
+              ? 'bg-[#2D1B13] border-amber-900/60 hover:border-red-500'
+              : 'bg-[#221008] border-[#5A3D2D] hover:border-accent'
+        }`}
       >
-        {opt}
+        <div className="flex justify-between items-start w-full mb-2 gap-2">
+           <span className="mono text-[10px] md:text-[11px] font-bold text-amber-100 tracking-tight leading-none">{opt.text}</span>
+           {opt.evidenceRequiredId && <BookOpen size={12} className="text-accent shrink-0" />}
+        </div>
+        <p className="text-[9px] md:text-[10px] text-amber-100/50 leading-tight mb-3 italic">{opt.description}</p>
+        
+        {isMissingEvidence ? (
+          <div className="flex items-center gap-1 text-[8px] font-bold text-red-500 uppercase mono bg-red-950/30 px-2 py-1 border border-red-900/40 w-fit">
+            <ShieldAlert size={10} />
+            LOCKED: Missing required exhibit
+          </div>
+        ) : isMissingCertification ? (
+          <div className="flex items-center gap-1 text-[8px] font-bold text-red-400 uppercase mono bg-red-950/30 px-2 py-1 border border-red-900/40 w-fit">
+            <AlertTriangle size={10} className="animate-pulse" />
+            RISK: Exhibit uncertified under BSA Sec 63
+          </div>
+        ) : opt.evidenceRequiredId ? (
+          <div className="flex items-center gap-1 text-[8px] font-bold text-accent-green uppercase mono bg-green-950/20 px-2 py-1 border border-green-950/40 w-fit">
+            <ShieldCheck size={10} />
+            PROVISION APPROVED: {requiredItem?.name} Ready
+          </div>
+        ) : null}
       </button>
     );
   };
@@ -82,7 +225,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       {/* Courtroom Header */}
       <div className="h-14 md:h-16 border-b-2 border-[#1A0D08] bg-[#3D251C] flex items-center px-4 md:px-8 justify-between shrink-0 text-amber-50 shadow-lg">
         <div className="flex items-center gap-3">
-          <Scale size={20} className="text-accent lg:block hidden" />
+          <Scale size={20} className="text-accent lg:block hidden animate-pulse" />
           <div>
             <h2 className="mono font-bold text-[9px] md:text-sm tracking-[0.2em] uppercase">High Court // Lucknow</h2>
             <span className="mono text-[7px] md:text-[10px] opacity-40 italic font-bold">STATE_VS_UNKNOWN // BNSS_PROTOCOL</span>
@@ -90,35 +233,40 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
         </div>
         <div className="flex items-center gap-4">
            <div className="flex flex-col items-end mr-4">
-              <span className="mono text-[8px] opacity-40 uppercase">Tension</span>
-              <div className="w-24 h-1 bg-[#1A0D08] mt-1 border border-[#5A3D2D]">
-                 <div className="h-full bg-accent transition-all duration-700" style={{ width: `${gameState.pressureMeter}%` }} />
+              <span className="mono text-[8px] opacity-40 uppercase">Judicial Pressure</span>
+              <div className="w-24 h-1 bg-[#1A0D08] mt-1 border border-[#5A3D2D] relative overflow-hidden">
+                 <div className={`h-full transition-all duration-700 ${gameState.pressureMeter > 75 ? 'bg-red-500 shadow-[0_0_10px_#ef4444]' : gameState.pressureMeter > 40 ? 'bg-amber-500' : 'bg-accent'}`} style={{ width: `${gameState.pressureMeter}%` }} />
               </div>
            </div>
+           {gameState.pressureMeter > 60 && (
+              <span className="hidden sm:inline-block px-2 py-1 border border-red-500/40 bg-red-950 text-red-500 text-[8px] font-bold uppercase mono tracking-widest animate-pulse max-w-xs truncate mr-2">
+                 ⚡ Bench Irritation: Max
+              </span>
+           )}
            <div className="status-chip bg-[#1A0D08] text-amber-200 border-[#5A3D2D] text-[8px] tracking-widest uppercase">In Session</div>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden relative">
         {/* Trial Area */}
-        <main className="flex-1 flex flex-col p-4 md:p-12 bg-[#2A1810] min-h-0 overflow-y-auto">
-           <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-12 items-start mb-6 md:mb-12 max-w-5xl mx-auto w-full">
+        <main className="flex-1 flex flex-col p-4 md:p-8 bg-[#2A1810] min-h-0 overflow-y-auto">
+           <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-10 items-start mb-6 md:mb-8 max-w-5xl mx-auto w-full">
              
              {/* Speaker Box */}
-             <div className="w-full md:w-80 flex flex-row md:flex-col gap-4 shrink-0">
-               <div className="w-24 h-24 md:w-full md:aspect-square bg-ink border-2 border-[#5A3D2D] relative overflow-hidden group shadow-2xl">
+             <div className="w-full md:w-72 flex flex-row md:flex-col gap-4 shrink-0">
+               <div className="w-20 h-20 md:w-full md:aspect-square bg-ink border-2 border-[#5A3D2D] relative overflow-hidden group shadow-2xl">
                   <img 
                     src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${trialStep.speaker.replace(/ /g, '_')}`} 
-                    className="w-full h-full object-cover grayscale brightness-75" 
+                    className={`w-full h-full object-cover grayscale brightness-75 transition-all duration-300 ${gameState.pressureMeter > 60 && trialStep.speaker === 'Virendra Sharma' ? 'scale-105 animate-pulse' : ''}`} 
                     alt={trialStep.speaker}
                   />
                   <div className="absolute inset-0 bg-accent/10 opacity-20" />
                </div>
-               <div className="flex-1 flex flex-col justify-center gap-2">
-                  <div className="hidden md:block h-1.5 bg-accent w-full opacity-50 shadow-[0_0_10px_rgba(218,61,44,0.5)] transition-opacity" style={{ opacity: gameState.pressureMeter / 100 }} />
+               <div className="flex-1 flex flex-col justify-center gap-1">
+                  <div className={`hidden md:block h-1 bg-accent w-full opacity-50 shadow-[0_0_10px_rgba(218,61,44,0.5)] transition-all`} style={{ opacity: gameState.pressureMeter / 100, transform: `scaleX(${gameState.pressureMeter / 100})` }} />
                   <div className="mono text-[8px] bg-[#1A0D08] px-2 py-1 text-amber-100/60 border border-[#5A3D2D] uppercase font-bold tracking-widest leading-none truncate">{trialStep.speaker}</div>
-                  <p className="text-[9px] md:text-[11px] text-amber-100/40 italic leading-tight">
-                    "Truth is the daughter of time, not of authority."
+                  <p className="text-[8px] md:text-[9px] text-amber-100/40 italic leading-tight max-w-xs">
+                    {trialStep.speaker === 'Justice G. Singh' ? "Strict constitutional text under old vs new codes." : trialStep.speaker === 'Virendra Sharma' ? '"Regards, Principal Sharma..."' : "Formal statutory arguments."}
                   </p>
                </div>
              </div>
@@ -131,24 +279,33 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="bg-[#1A0D08] p-8 md:p-12 relative shadow-[0px_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-center border-2 border-[#5A3D2D]"
+                    className={`bg-[#1A0D08] p-6 md:p-10 relative shadow-[0px_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-center border-2 border-[#5A3D2D] ${
+                      gameState.pressureMeter > 70 ? 'border-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.15)] animate-shake' : ''
+                    }`}
                   >
                     <div className="absolute -top-3 -left-3 md:-top-4 md:-left-4 bg-accent text-white p-2 md:p-3 shadow-lg">
-                       <Gavel size={20} className="md:w-6 md:h-6" />
+                       <Gavel size={18} className="md:w-5 md:h-5" />
                     </div>
                     
-                    <div className="flex justify-between items-center mb-4 md:mb-6 border-b border-[#5A3D2D] pb-2">
-                       <span className="mono text-[10px] md:text-[11px] font-bold text-amber-500 uppercase tracking-[0.3em]">{trialStep.type}</span>
-                       <div className="mono text-[8px] md:text-[9px] text-amber-100/20">LOG_ID: {trialStep.id}</div>
+                    <div className="flex justify-between items-center mb-4 border-b border-[#5A3D2D] pb-2">
+                       <span className="mono text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em]">{trialStep.type}</span>
+                       <div className="mono text-[8px] text-amber-100/20">LOG_ID: {trialStep.id}</div>
                     </div>
 
-                    <p className={`text-2xl md:text-3xl font-serif leading-snug italic tracking-tight text-amber-50 ${gameState.pressureMeter > 80 ? 'blur-[0.5px]' : ''}`}>
-                      "{trialStep.text}"
+                    {/* Narrative Frame Note */}
+                    {trialStep.narrativeStateNote && (
+                      <p className="text-[10px] text-amber-500/60 italic mono mb-4 border-l border-amber-900/60 pl-3">
+                         {trialStep.narrativeStateNote}
+                      </p>
+                    )}
+
+                    <p className={`text-xl md:text-2xl font-serif leading-snug italic tracking-tight text-amber-50 relative ${gameState.pressureMeter > 80 ? 'blur-[0.3px]' : ''}`}>
+                      "{getDynamicDialogue(trialStep.speaker, trialStep.text)}"
                     </p>
 
                     {trialStep.type === 'objection' && trialStep.options && (
-                        <div className="mt-8 md:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                           {trialStep.options.map(opt => renderOption(opt))}
+                        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {trialStep.options.map(opt => renderOptionCard(opt))}
                         </div>
                     )}
                   </motion.div>
@@ -157,27 +314,27 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                 {!showContradiction && trialStep.type !== 'objection' && (
                     <button 
                         onClick={handleNextStep}
-                        className="btn-accent w-full py-4 md:py-6 text-[9px] md:text-[11px] border-2 border-[#5A3D2D] shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 uppercase font-bold tracking-[0.2em]"
+                        className="btn-accent w-full py-4 text-[9px] md:text-[10px] border-2 border-[#5A3D2D] shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 uppercase font-bold tracking-[0.2em]"
                     >
-                        CONTINUE // STEP_{step}
+                        ADVANCE TRIAL // STEP_{step}
                     </button>
                 )}
              </div>
            </div>
 
            {/* Admissible Exhibits */}
-           <div className="mt-4">
-              <div className="col-header border-amber-900/40 text-amber-500 text-[9px] mb-3 uppercase tracking-widest">Admissible Exhibits</div>
+           <div className="mt-4 border-t border-amber-950/40 pt-4">
+              <div className="col-header border-amber-900/40 text-amber-500 text-[9px] mb-3 uppercase tracking-widest font-bold">Judicially Admitted Exhibits</div>
               <div className="flex gap-3 overflow-x-auto pb-4 touch-pan-x">
                 {gameState.inventory.map(item => (
                   <div 
                      key={item.id}
-                     className={`p-3 border shrink-0 w-32 md:w-40 transition-all ${GameEngine.isEvidenceAdmissible(item) ? 'bg-[#1A0D08] border-accent/50' : 'opacity-20 grayscale border-[#5A3D2D]'}`}
+                     className={`p-3 border shrink-0 w-36 md:w-44 transition-all bg-[#1e130f]/60 ${GameEngine.isEvidenceAdmissible(item) ? 'border-accent-green/40 shadow-[0_0_8px_rgba(34,197,94,0.1)]' : 'opacity-20 grayscale border-[#5A3D2D]'}`}
                   >
-                    <div className="mono text-[8px] font-bold text-amber-100/60 truncate mb-1">{item.name}</div>
-                    <div className="flex justify-between items-center">
-                       <span className="mono text-[7px] text-accent font-bold">{GameEngine.isEvidenceAdmissible(item) ? 'ADMITTED' : 'EXCLUDED'}</span>
-                       {item.hasBSACertificate && <ShieldCheck size={10} className="text-accent" />}
+                    <div className="mono text-[9px] font-bold text-amber-200 truncate mb-1">{item.name}</div>
+                    <div className="flex justify-between items-center text-[8px]">
+                       <span className={`mono font-bold ${GameEngine.isEvidenceAdmissible(item) ? 'text-accent-green' : 'text-red-500/60'}`}>{GameEngine.isEvidenceAdmissible(item) ? 'ADMITTED' : 'EXCLUDED'}</span>
+                       {item.hasBSACertificate && <ShieldCheck size={11} className="text-accent-green" />}
                     </div>
                   </div>
                 ))}
@@ -193,56 +350,206 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                 {gameState.inventory.map(item => (
                     <div 
                         key={item.id}
-                        className={`p-4 border-2 transition-all cursor-default ${GameEngine.isEvidenceAdmissible(item) ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.2)]' : 'bg-[#1A0D08]/50 border-[#5A3D2D] opacity-60'}`}
+                        className={`p-4 border-2 transition-all cursor-default ${GameEngine.isEvidenceAdmissible(item) ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.2)]' : 'bg-[#1A0D08]/50 border-[#5A3D2D]'}`}
                     >
                         <div className="flex justify-between mb-2">
                            <span className="mono text-[10px] font-bold text-amber-50 tracking-tighter">{item.name}</span>
                            <span className="mono text-[8px] opacity-40 uppercase">{item.type}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                           <div className={`w-1.5 h-1.5 rounded-full ${GameEngine.isEvidenceAdmissible(item) ? 'bg-accent shadow-[0_0_10px_rgba(218,61,44,1)]' : 'bg-[#5A3D2D]'}`} />
-                           <span className="mono text-[8px] text-amber-100/40 font-bold uppercase">{item.authenticity} // {item.admissibility}</span>
+                        <div className="flex items-center justify-between text-[8px]">
+                           <span className="mono text-amber-100/40 font-bold uppercase">{item.authenticity} // {item.admissibility}</span>
+                           <div className="flex items-center gap-1 text-accent font-bold">
+                             <TrendingDown size={10} />
+                             <span>{item.courtConfidence}%</span>
+                           </div>
                         </div>
                     </div>
                 ))}
             </div>
             
-            <div className="mt-8 p-4 bg-[#2A1810] border border-[#5A3D2D] space-y-4">
-               <div className="mono text-[9px] text-amber-500 font-bold uppercase tracking-widest">Judicial Notes</div>
-               <p className="text-[10px] text-amber-100/40 leading-relaxed italic">
-                 Court confidence is currently {(gameState.inventory.reduce((acc, curr) => acc + curr.courtConfidence, 0) / (gameState.inventory.length || 1)).toFixed(0)}%. 
-                 Presentation of uncertified digital artifacts will provoke summary dismissal.
+            <div className="mt-auto p-4 bg-[#2A1810] border border-[#5A3D2D] space-y-4 shadow-xl">
+               <div className="mono text-[9px] text-amber-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                  <BookOpen size={12} />
+                  Judicial Notes
+               </div>
+               <p className="text-[10px] text-amber-100/40 leading-relaxed italic border-l-2 border-accent pl-3">
+                 Court confidence is currently {(gameState.inventory.reduce((acc, curr) => acc + (curr.courtConfidence || 0), 0) / (gameState.inventory.length || 1)).toFixed(0)}%. 
+                 Presentation of uncertified digital bytes or inconsistent artifacts risks sudden contempt triggers and witness loss-of-faith logs.
                </p>
             </div>
         </aside>
 
-        {/* Global Contradiction Alert Flash */}
+        {/* Objections Option Outcome Overlay Modal */}
+        <AnimatePresence>
+            {selectedOptionOutcome && (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[140] bg-black/90 backdrop-blur-md flex items-center justify-center p-6"
+                >
+                    <motion.div 
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0.95 }}
+                        className="bg-[#1A0D08] p-8 md:p-10 border-2 border-[#5A3D2D] flex flex-col gap-6 max-w-xl w-full text-left shadow-[20px_20px_0px_0px_rgba(42,24,16,1)]"
+                    >
+                        <div>
+                           <span className="mono text-[9px] text-[#A67C52] uppercase font-bold tracking-widest block mb-1">OBJECTION RESOLUTIOIN // DIRECTED SPECTRUM</span>
+                           <h4 className="text-xl md:text-2xl font-serif font-bold text-amber-100 leading-snug">
+                             "{selectedOptionOutcome.text}"
+                           </h4>
+                        </div>
+                        
+                        <p className="text-xs md:text-sm italic font-medium leading-relaxed text-amber-100/70 bg-[#26150F] p-4 border border-amber-950/40">
+                           {selectedOptionOutcome.outcomeDialogue}
+                        </p>
+
+                        <div className="grid grid-cols-3 gap-3">
+                           <div className="p-3 bg-black/40 border border-[#5A3D2D] text-left">
+                              <span className="mono text-[8px] opacity-40 uppercase block">Justice Impact</span>
+                              <span className={`mono font-bold text-xs ${selectedOptionOutcome.impactOnJustice >= 0 ? 'text-accent-green' : 'text-red-500'}`}>
+                                {selectedOptionOutcome.impactOnJustice >= 0 ? '+' : ''}{selectedOptionOutcome.impactOnJustice} PTS
+                              </span>
+                           </div>
+                           <div className="p-3 bg-black/40 border border-[#5A3D2D] text-left">
+                              <span className="mono text-[8px] opacity-40 uppercase block">Statute Accuracy</span>
+                              <span className={`mono font-bold text-xs ${selectedOptionOutcome.impactOnLegal >= 0 ? 'text-accent' : 'text-red-500'}`}>
+                                {selectedOptionOutcome.impactOnLegal >= 0 ? '+' : ''}{selectedOptionOutcome.impactOnLegal} PTS
+                              </span>
+                           </div>
+                           <div className="p-3 bg-black/40 border border-[#5A3D2D] text-left">
+                              <span className="mono text-[8px] opacity-40 uppercase block">Tension Delta</span>
+                              <span className={`mono font-bold text-xs ${selectedOptionOutcome.impactOnPressure <= 0 ? 'text-accent-green' : 'text-red-500'}`}>
+                                {selectedOptionOutcome.impactOnPressure >= 0 ? '+' : ''}{selectedOptionOutcome.impactOnPressure} PTS
+                              </span>
+                           </div>
+                        </div>
+
+                        <button 
+                            onClick={confirmOptionOutcome}
+                            className="bg-accent text-white mono font-bold text-[10px] w-full py-4 border-2 border-[#5A3D2D] hover:bg-black uppercase tracking-[0.2em] transition-all shadow-md active:translate-y-0.5"
+                        >
+                            RECORD STATEMENT & PROCEED <ChevronRight size={14} className="inline opacity-60" />
+                        </button>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* Global DEDUCTION / Interactive Contradiction Modal */}
         <AnimatePresence>
             {showContradiction && (
                 <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[120] bg-accent/90 backdrop-blur-md flex items-center justify-center p-6"
+                    className="fixed inset-0 z-[120] bg-black/95 backdrop-blur-lg flex items-center justify-center p-4 md:p-8"
                 >
                     <motion.div 
-                        initial={{ scale: 0.9 }}
+                        initial={{ scale: 0.95 }}
                         animate={{ scale: 1 }}
-                        className="bg-white p-8 md:p-12 border-4 border-accent-dark flex flex-col items-center gap-8 shadow-[20px_20px_0px_0px_rgba(42,24,16,1)] max-w-sm w-full"
+                        className="bg-[#1A0D08] border-2 border-[#5A3D2D] flex flex-col max-w-2xl w-full shadow-[20px_20px_0px_0px_rgba(42,24,16,1)] h-[85vh] md:h-auto min-h-0 overflow-y-auto"
                     >
-                        <AlertCircle size={64} className="text-accent animate-bounce" />
-                        <div className="text-center">
-                           <h4 className="mono font-bold text-ink text-3xl leading-none mb-3 uppercase tracking-tighter">
-                             Perjury_Detect
-                           </h4>
-                           <p className="text-xs text-ink/60 mono italic font-medium">The witness's claim has been flagged by judicial logic. Present contradicting exhibit to proceed.</p>
+                        {/* Interactive Header */}
+                        <div className="p-6 border-b border-[#5A3D2D] bg-[#2A1810]/70">
+                            <div className="flex items-center gap-3">
+                               <AlertCircle size={28} className="text-accent animate-pulse" />
+                               <div>
+                                  <h4 className="mono font-bold text-amber-100 text-xl tracking-tighter uppercase leading-none">
+                                    IMPEACHMENT INITIATION // ACTIVE DEDUCTION
+                                  </h4>
+                                  <p className="text-[10px] text-amber-100/40 mono italic leading-none mt-1">Cross-examine the witness logs. Present contradicting exhibit from your inventory.</p>
+                               </div>
+                            </div>
                         </div>
-                        <button 
-                            onClick={handleContradictionSuccess}
-                            className="bg-accent text-white mono font-bold text-xs w-full py-5 border-2 border-accent hover:bg-ink hover:text-white transition-all uppercase tracking-[0.2em] shadow-[4px_4px_0px_0px_rgba(42,24,16,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
-                        >
-                            Expose_Inconsistency
-                        </button>
+
+                        {/* Middle body */}
+                        <div className="flex-1 p-6 space-y-6">
+                           <div className="bg-black/40 p-4 border border-red-950/40">
+                              <span className="mono text-[8px] text-accent uppercase font-bold tracking-widest block mb-1">Target Statement to Impeach</span>
+                              <p className="text-xs md:text-sm font-serif italic text-amber-100/80 leading-relaxed">
+                                 "{getDynamicDialogue(trialStep.speaker, trialStep.text)}"
+                              </p>
+                           </div>
+
+                           {contradictionResult.status === null ? (
+                             <>
+                               {/* Selector */}
+                               <div className="space-y-3">
+                                  <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">Select Contradiction Exhibit</div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
+                                     {gameState.inventory.map(item => {
+                                        const isSelected = selectedContradictionId === item.id;
+                                        const isAdmissible = GameEngine.isEvidenceAdmissible(item);
+                                        return (
+                                           <button
+                                              key={item.id}
+                                              onClick={() => setSelectedContradictionId(item.id)}
+                                              className={`p-3 text-left border-2 transition-all relative flex flex-col justify-center ${
+                                                 isSelected 
+                                                   ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)]'
+                                                   : 'bg-black/30 border-[#5A3D2D] hover:border-amber-900/60'
+                                              }`}
+                                           >
+                                              <div className="font-bold text-[10px] text-amber-100 truncate w-full mb-1">{item.name}</div>
+                                              <div className="flex justify-between items-center text-[8px] w-full">
+                                                 <span className="mono opacity-40 uppercase">{item.type}</span>
+                                                 <span className={`mono font-bold ${isAdmissible ? 'text-accent-green' : 'text-accent'}`}>
+                                                    {isAdmissible ? 'ADMITTED // READY' : 'UNCERTIFIED // REJECTABLE'}
+                                                 </span>
+                                              </div>
+                                           </button>
+                                        );
+                                     })}
+                                     {gameState.inventory.length === 0 && (
+                                        <div className="text-center p-6 text-xs text-amber-100/40 italic bg-black/30 col-span-2">
+                                           You have collected zero materials in your case docket as legal basis.
+                                        </div>
+                                     )}
+                                  </div>
+                               </div>
+
+                               <button 
+                                   disabled={!selectedContradictionId}
+                                   onClick={handleExecuteContradiction}
+                                   className={`w-full py-4 border-2 uppercase font-bold text-[10px] tracking-widest shadow-md transition-all ${
+                                      selectedContradictionId
+                                        ? 'bg-accent text-white border-accent hover:bg-black hover:text-white'
+                                        : 'bg-[#180E0A] text-amber-100/20 border-amber-950/20 cursor-not-allowed'
+                                   }`}
+                               >
+                                   VERIFY DOCKET CONTRADICTION
+                               </button>
+                             </>
+                           ) : (
+                             /* Feedback Panel */
+                             <div className="space-y-6">
+                                <div className={`p-5 border flex items-start gap-4 ${
+                                   contradictionResult.status === 'success' 
+                                     ? 'bg-green-950/20 border-green-500/30 text-green-200'
+                                     : 'bg-red-950/20 border-red-500/30 text-red-200'
+                                }`}>
+                                   {contradictionResult.status === 'success' ? (
+                                      <CheckCircle2 size={24} className="text-accent-green shrink-0 mt-0.5" />
+                                   ) : (
+                                      <XCircle size={24} className="text-red-500 shrink-0 mt-0.5" />
+                                   )}
+                                   <div className="space-y-1">
+                                      <h5 className="mono font-bold uppercase text-[10px] tracking-widest text-amber-100">Deduction Outcome</h5>
+                                      <p className="text-[11px] md:text-xs leading-relaxed opacity-90">{contradictionResult.message}</p>
+                                   </div>
+                                </div>
+
+                                <button 
+                                    onClick={confirmContradictionClose}
+                                    className="bg-accent text-white mono font-bold text-[10px] w-full py-4 border-2 border-[#5A3D2D] hover:bg-black uppercase tracking-[0.2em]"
+                                >
+                                    {contradictionResult.status === 'success' ? 'DISCREDIT & CONTINUE' : 'RETRY ACTIVE DEDUCTION'}
+                                </button>
+                             </div>
+                           )}
+                        </div>
                     </motion.div>
                 </motion.div>
             )}

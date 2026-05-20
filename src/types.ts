@@ -92,16 +92,31 @@ export interface NPC {
   avatarUrl?: string;
 }
 
+export interface TrialStepOption {
+  id: string;
+  text: string;
+  description: string;
+  risks?: string;
+  evidenceRequiredId?: string;
+  requiresBsaCertificate?: boolean;
+  impactOnPressure: number;
+  impactOnJustice: number;
+  impactOnLegal: number;
+  npcTrustInfluence?: { npcId: string; amount: number };
+  outcomeDialogue: string;
+}
+
 export interface TrialStep {
   id: string;
   type: 'statement' | 'objection' | 'evidence_request' | 'verdict_moment';
   speaker: string;
   text: string;
-  options?: string[];
+  options?: TrialStepOption[];
   requiredEvidenceIds?: string[];
   contradictionEvidenceId?: string;
   impactOnPressure?: number;
   impactOnJustice?: number;
+  narrativeStateNote?: string; // e.g. "Judge leaning forward", "Witness wiping palms"
 }
 
 export interface Case {
