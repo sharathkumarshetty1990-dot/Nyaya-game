@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameState, Case, AuthenticityStatus, AdmissibilityStatus, TrialStepOption, Evidence } from '../../types';
 import { GameEngine } from '../../game/gameEngine';
+import { resolveDynamicDialogue } from '../../game/characterSystem';
+import { audioService } from '../../game/audio';
+import Typewriter from '../Typewriter';
 import { 
   Gavel, 
   Scale, 
@@ -29,35 +32,31 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   const [showContradiction, setShowContradiction] = useState(false);
   const [selectedContradictionId, setSelectedContradictionId] = useState<string | null>(null);
   const [contradictionResult, setContradictionResult] = useState<{
-    status: 'success' | 'failure' | 'inadmissible' | null;
+    status: 'success' | 'failure' | 'inadmissible' | 'strong' | 'partial' | 'weak' | null;
     message: string;
   }>({ status: null, message: '' });
 
   const [selectedOptionOutcome, setSelectedOptionOutcome] = useState<TrialStepOption | null>(null);
   const [pressureAnim, setPressureAnim] = useState(false);
+  const [objectionFlash, setObjectionFlash] = useState(false);
+
+  // Background tension audio pulse setup
+  useEffect(() => {
+    audioService.startPressureBackingTrack(gameState.pressureMeter);
+    return () => {
+      audioService.stopPressureBackingTrack();
+    };
+  }, []);
+
+  useEffect(() => {
+    audioService.updatePressure(gameState.pressureMeter);
+  }, [gameState.pressureMeter]);
 
   const trialStep = currentCase.trialFlow[step];
 
-  // Helper to determine modified dialogue on high pressure (adds narrative texture)
+  // Helper to determine modified dialogue on high pressure (delegates to character system profile registry)
   const getDynamicDialogue = (speaker: string, originalText: string) => {
-    if (gameState.pressureMeter > 50) {
-      if (speaker === 'Virendra Sharma') {
-        return `*(Wiping cold sweat from his neck, his hands shaking violently)* "... I... I can't focus. They... they said they were cyber officers with a direct warrant. Standard CBI Lucknow digital lockdown! My heart is pounding... I always sign my notes 'Regards, Principal Sharma' and they... they mapped it directly. Please, my chest is so tight..."`;
-      }
-      if (speaker === 'Justice G. Singh') {
-        return `*(Slamming his gavel down with an aggressive crash, frowning sternly)* "Counsel! I will not tolerate further digital obfuscation or procedural delays. This court rules on strict evidentiary thresholds! Present a verified BSA 63 certificate or face immediate exclusion penalties!"`;
-      }
-      if (speaker === 'CBI Poser (Transcript)') {
-        return `*(Digital transcript flickers rapidly)* "WARNING // BARRACKS LOCKDOWN INITIATED... ESCROW ROUTE SECURED under direct judicial mandate. LIQUIDATE PORTFOLIO IMMEDIATELY OR PREPARE FOR TWENTY-NINE YEARS OF RIGOROUS IMPRISONMENT."`;
-      }
-      
-      // Generic dramatic stutter under high pressure context
-      return originalText
-        .replace(/ the /gi, ' ... the ')
-        .replace(/\. /g, '... I... ')
-        .toUpperCase() + " [PRESSURE LEVEL EXTREME]";
-    }
-    return originalText;
+    return resolveDynamicDialogue(speaker, originalText, gameState.pressureMeter);
   };
 
   const handleNextStep = () => {
@@ -71,13 +70,21 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       }));
 
       if (currentStep.contradictionEvidenceId) {
-        setShowContradiction(true);
-        setSelectedContradictionId(null);
-        setContradictionResult({ status: null, message: '' });
+        // Trigger high-impact Phoenix Wright styled OBJECTION splash
+        setObjectionFlash(true);
+        audioService.playObjection();
+        setTimeout(() => {
+          setObjectionFlash(false);
+          setShowContradiction(true);
+          setSelectedContradictionId(null);
+          setContradictionResult({ status: null, message: '' });
+        }, 1100);
       } else {
+        audioService.playGavel();
         setStep(step + 1);
       }
     } else {
+        audioService.playSuccess();
         const nextPhase = GameEngine.getNextPhase(gameState.phase);
         setGameState(prev => ({ ...prev, phase: nextPhase }));
     }
@@ -92,6 +99,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       }
       if (opt.requiresBsaCertificate && !GameEngine.isEvidenceAdmissible(hasItem)) {
         // If they try to choose it but the item is uncertified, they fail
+        audioService.playBuzzer();
         setSelectedOptionOutcome({
           ...opt,
           id: 'failed-cert-option',
@@ -105,6 +113,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       }
     }
 
+    audioService.playSuccess();
     setSelectedOptionOutcome(opt);
   };
 
@@ -126,6 +135,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       };
     });
 
+    audioService.playGavel();
     setSelectedOptionOutcome(null);
     setStep(step + 1);
   };
@@ -136,26 +146,48 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     const selectedItem = gameState.inventory.find(e => e.id === selectedContradictionId);
     if (!selectedItem) return;
 
-    const correctId = trialStep.contradictionEvidenceId;
-
-    if (selectedContradictionId === correctId) {
-      // Correct item! Check if it's admissible
+    // We grade outcome depending on the specific item they select to impeachment the alibi:
+    if (selectedItem.id === 'newspaper-cji') {
+      // Correct item
       if (GameEngine.isEvidenceAdmissible(selectedItem)) {
+        audioService.playSuccess();
         setContradictionResult({
-          status: 'success',
-          message: `IMPEACHMENT SUCCESSFUL! You stand up and raise the ${selectedItem.name}. You demonstrate to the bench that on April 14th, the actual Chief Justice of India was presiding in New Delhi, making the 'cyber logs' claiming he was on a secret call from his chambers in Lucknow an absolute mathematical lie. The transcript witness is discredited!`
+          status: 'strong',
+          message: `STRONG CONTRADICTION ACCEPTED! You stand up and raise the certified physical newspaper clipping showing the CJI in Delhi on April 14th! You demonstrate to the bench that the Chief Justice of India was sitting on active judicial benches in New Delhi until late morning, concluding after 11:00 AM. This makes Inspector Amit Sen's claim that the Chief Justice was on an early secret call with him in the Lucknow High Court cyber barracks a logistical and spatial fabrication. Justice Singh slams his gavel: 'A physical record of the daily courts cannot be overruled by loose digital logs. The transcript witness Amit Sen stands deeply discredited. Impeachment established!'`
         });
       } else {
+        audioService.playBuzzer();
         setContradictionResult({
           status: 'inadmissible',
-          message: `PROCEDURAL REJECTION! You identified the correct contradiction—the ${selectedItem.name} demonstrates the CJI was in New Delhi. However, because this clipping is NOT yet admitted or authenticated into the judicial record, the Defense Counsel Objects: 'Counsel presents a newspaper that has not been verified! This violates the rules of custodial chain physical entry!' The judge sustains. The evidence remains inadmissible!`
+          message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the newspaper clipping demonstrating the CJI's New Delhi presence. But because you have NOT yet authenticated and verified this physical clipping on your local Verification screen, the Defense Counsel leaps up: 'Objection! Local newsprint carries zero evidentiary weight without physical custody chain logs!' Justice Singh sustaining: 'Sustained. Until this newspaper's CMYK color dots are authenticated and registered, it remains legally invisible before this bench!'`
         });
         setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
         setPressureAnim(true);
         setTimeout(() => setPressureAnim(false), 500);
       }
+    } else if (selectedItem.id === 'wa-ss') {
+      // Partial contradiction
+      audioService.playBuzzer();
+      setContradictionResult({
+        status: 'partial',
+        message: `PARTIAL CONTRADICTION! You present the WhatsApp Screenshot detailing an international VoIP call mask starting with +44. You claim the call routed from European trunk nodes contradicts the assertion that they sync local Lucknow barracks logs. The Defense Counselor rolls his eyes: 'Scammers use dynamic international spoof routing maps all the time. That has zero bearing on where Inspector Sen was physically sitting!' Justice Singh shakes his head slightly: 'It is a suspicious discrepancy, Counsel, but far from conclusive. It does not physically impeach his presence in Lucknow.' (Advancing with weakened persuasive weight)`
+      });
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 5) }));
+      setPressureAnim(true);
+      setTimeout(() => setPressureAnim(false), 500);
+    } else if (selectedItem.id === 'cbi-logo') {
+      // Weak contradiction
+      audioService.playBuzzer();
+      setContradictionResult({
+        status: 'weak',
+        message: `WEAK CONTRADICTION! You raise the CBI uniform logo grab with pixelated compression crops to prove a simulated badge. Defense objects: 'Under BSA, minor rendering and pixel overlays do not refute physical locations! The Inspector might have had a poorly printed vest. How does poor thread resolution prove he wasn't there?' The Judge sighs in deep irritation: 'Sustained. Digital insignia compression is emotionally suggestive but completely fails to refute the spatial timeline. Do not waste the bench's time with speculative visual theories.'`
+      });
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 10) }));
+      setPressureAnim(true);
+      setTimeout(() => setPressureAnim(false), 500);
     } else {
-      // Incorrect item
+      // General failure
+      audioService.playBuzzer();
       setContradictionResult({
         status: 'failure',
         message: `MISTAKEN DEDUCTION! You present the ${selectedItem.name} to challenge Inspector Amit Sen's transcript log. The Defense Counsel scoffs: 'Counsel is shooting in the dark. How does this exhibit prove a scheduling anomaly?' Justice G. Singh shakes his head in deep irritation, warning you not to waste the court's time.`
@@ -167,16 +199,28 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   };
 
   const confirmContradictionClose = () => {
-    if (contradictionResult.status === 'success') {
+    if (['strong', 'success'].includes(contradictionResult.status || '')) {
+      audioService.playSuccess();
       setShowContradiction(false);
       setStep(step + 1);
       setGameState(prev => ({
         ...prev,
         justiceScore: Math.min(100, prev.justiceScore + 25),
-        pressureMeter: Math.max(0, prev.pressureMeter - 15)
+        pressureMeter: Math.max(0, prev.pressureMeter - 20)
+      }));
+    } else if (contradictionResult.status === 'partial') {
+      audioService.playSuccess();
+      setShowContradiction(false);
+      setStep(step + 1);
+      setGameState(prev => ({
+        ...prev,
+        justiceScore: Math.min(100, prev.justiceScore + 10),
+        // Let the partial advance but keep a slight pressure warning
+        pressureMeter: Math.min(100, prev.pressureMeter + 5)
       }));
     } else {
-      // Stay on screen to let them rewrite history or correct their mistake
+      audioService.playGavel();
+      // Let them retry or correct, but they already took the pressure penalties in handleExecuteContradiction
       setContradictionResult({ status: null, message: '' });
       setSelectedContradictionId(null);
     }
@@ -308,7 +352,14 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                     )}
 
                     <p className={`text-xl md:text-2xl font-serif leading-snug italic tracking-tight text-amber-50 relative ${gameState.pressureMeter > 80 ? 'blur-[0.3px]' : ''}`}>
-                      "{getDynamicDialogue(trialStep.speaker, trialStep.text)}"
+                      "
+                      <Typewriter 
+                        key={step} 
+                        text={getDynamicDialogue(trialStep.speaker, trialStep.text)} 
+                        speed={10} 
+                        playTickSound={!audioService.getIsMuted()} 
+                      />
+                      "
                     </p>
 
                     {trialStep.type === 'objection' && trialStep.options && (
@@ -551,7 +602,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                      ? 'bg-green-950/20 border-green-500/30 text-green-200'
                                      : 'bg-red-950/20 border-red-500/30 text-red-200'
                                 }`}>
-                                   {contradictionResult.status === 'success' ? (
+                                   {(contradictionResult.status === 'success' || contradictionResult.status === 'strong' || contradictionResult.status === 'partial') ? (
                                       <CheckCircle2 size={24} className="text-accent-green shrink-0 mt-0.5" />
                                    ) : (
                                       <XCircle size={24} className="text-red-500 shrink-0 mt-0.5" />
@@ -566,7 +617,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                     onClick={confirmContradictionClose}
                                     className="bg-accent text-white mono font-bold text-[10px] w-full py-4 border-2 border-[#5A3D2D] hover:bg-black uppercase tracking-[0.2em]"
                                 >
-                                    {contradictionResult.status === 'success' ? 'DISCREDIT & CONTINUE' : 'RETRY ACTIVE DEDUCTION'}
+                                    {(contradictionResult.status === 'success' || contradictionResult.status === 'strong' || contradictionResult.status === 'partial') ? 'DISCREDIT & CONTINUE' : 'RETRY ACTIVE DEDUCTION'}
                                 </button>
                              </div>
                            )}

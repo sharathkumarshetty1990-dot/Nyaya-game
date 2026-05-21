@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameState, Evidence, AuthenticityStatus, AdmissibilityStatus } from '../../types';
 import { GameEngine } from '../../game/gameEngine';
+import { audioService } from '../../game/audio';
 import { 
   Fingerprint, 
   ShieldCheck, 
@@ -105,7 +106,8 @@ interface TimelineItem {
   label: string;
   source: string;
   timeLabel: string;
-  sortOrder: number;
+  expectedEvidenceId: string;
+  associatedEvidenceId: string | null;
 }
 
 export default function VerificationScreen({ gameState, setGameState }: VerificationScreenProps) {
@@ -125,14 +127,18 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
   const [selectedHypothesisId, setSelectedHypothesisId] = useState<string | null>(null);
   const [hypothesisResult, setHypothesisResult] = useState<{ isCorrect: boolean; feedback: string } | null>(null);
 
-  // Timeline Reconstruction Puzzle
+  // Timeline Reconstruction Puzzle & Evidence Linker
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([
-    { id: 't-safe', label: "Principal Sharma is forced to initiate safe-keeping escrow transfer", source: "Bank Wire Log", timeLabel: "10:30 AM IST", sortOrder: 0 },
-    { id: 't-cbi', label: "Inspector Amit Sen starts live WhatsApp video call from claimed 'Lucknow Barracks'", source: "WhatsApp Screenshot", timeLabel: "10:00 AM IST", sortOrder: 0 },
-    { id: 't-cji', label: "Chief Justice G. Singh arrives at Supreme Court Courtroom 1 in New Delhi", source: "Times Print Clipping", timeLabel: "11:00 AM IST", sortOrder: 0 }
+    { id: 't-cbi', label: "Inspector Amit Sen starts live WhatsApp video call from claimed 'Lucknow Barracks'", source: "WhatsApp Screenshot", timeLabel: "10:00 AM IST", expectedEvidenceId: 'wa-ss', associatedEvidenceId: null },
+    { id: 't-safe', label: "Principal Sharma is forced to initiate safe-keeping escrow transfer", source: "Bank Wire Log", timeLabel: "10:30 AM IST", expectedEvidenceId: 'cbi-logo', associatedEvidenceId: null },
+    { id: 't-cji', label: "Chief Justice G. Singh arrives at Supreme Court Courtroom 1 in New Delhi", source: "Times Print Clipping", timeLabel: "11:00 AM IST", expectedEvidenceId: 'newspaper-cji', associatedEvidenceId: null }
   ]);
   const [timelineSolved, setTimelineSolved] = useState<boolean>(false);
   const [timelineFeedback, setTimelineFeedback] = useState<string | null>(null);
+
+  const associateEvidenceToTimelineItem = (itemId: string, evidenceId: string | null) => {
+    setTimelineItems(prev => prev.map(item => item.id === itemId ? { ...item, associatedEvidenceId: evidenceId } : item));
+  };
 
   useEffect(() => {
     // Reset diagnostics whenever active evidence changes
@@ -155,28 +161,54 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
     if (!selectedEvidence) return;
     setDiagnosticTask('scanning');
     
+    // Play an interactive scanner activation sound clip
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const audioCtx = new AudioCtx();
+        // Play scan wave sound
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1.1);
+        gain.gain.setValueAtTime(0.012, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.2);
+      }
+    } catch (_) {}
+
     setTimeout(() => {
       // Different resolution requirements based on the item
       if (selectedEvidence.id === 'wa-ss') {
         if (timezoneDialOffset === -330) { // Matching UTC-5:30 proxy offset
           setDiagnosticTask('interpreting');
           setExifVerified(true);
+          audioService.playSuccess();
         } else {
           setDiagnosticTask('failed');
+          audioService.playBuzzer();
         }
       } else if (selectedEvidence.id === 'cbi-logo') {
         if (selectedHotspot === 'badge-edge' && activeLens === 'edge') {
           setDiagnosticTask('interpreting');
+          audioService.playSuccess();
         } else {
           setDiagnosticTask('failed');
+          audioService.playBuzzer();
         }
       } else {
         // Newspaper
         if (dotResolution >= 280) {
           setDiagnosticTask('interpreting');
           setNewspaperDotsScanned(true);
+          audioService.playSuccess();
         } else {
           setDiagnosticTask('failed');
+          audioService.playBuzzer();
         }
       }
     }, 1200);
@@ -185,6 +217,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
   const handleSelectHypothesis = (hyp: HypothesisOption) => {
     setSelectedHypothesisId(hyp.id);
     if (hyp.isCorrect) {
+      audioService.playSuccess();
       setHypothesisResult({
         isCorrect: true,
         feedback: hyp.explanation
@@ -210,6 +243,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
 
       setDiagnosticTask('solved');
     } else {
+      audioService.playBuzzer();
       setHypothesisResult({
         isCorrect: false,
         feedback: hyp.explanation
@@ -235,45 +269,75 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
     setTimelineItems(newItems);
   };
 
-  // Verify chronology logic
+  // Verify chronology logic & Evidence Linker
   const handleVerifyTimeline = () => {
-    // Correct absolute order should be:
-    // 1. Amit Sen CBI Call (10:00 AM IST) - id: t-cbi
-    // 2. Fund safe-keeping transfer (10:30 AM IST) - id: t-safe
-    // 3. CJI Delhi Hearing (11:00 AM IST) - id: t-cji
+    // 1. Correct order of events (chronological):
+    // - t-cbi (10:00 AM Call)
+    // - t-safe (10:30 AM Safe escrow transfer)
+    // - t-cji (11:00 AM Supreme Hearing)
+    const correctOrderIds = ['t-cbi', 't-safe', 't-cji'];
+    const currentOrderIds = timelineItems.map(item => item.id);
+    const hasOrderCorrect = correctOrderIds.every((id, idx) => currentOrderIds[idx] === id);
     
-    const correctIds = ['t-cbi', 't-safe', 't-cji'];
-    const currentIds = timelineItems.map(item => item.id);
-    const isCorrect = correctIds.every((id, idx) => currentIds[idx] === id);
-
-    if (isCorrect) {
-      setTimelineSolved(true);
-      setTimelineFeedback("TIMELINE MATCH SUCCESSFUL! By arranging these events, you present the classic 'temporal impossibility'—Inspector Amit Sen claimed that as late as 10:45 AM, the Chief Justice was actively sitting with him in the Lucknow office. However, official records prove the CJI's New Delhi hearing convened at 11:00 AM, making a concurrent Lucknow alibi a physical and logistical fabrication. Excellent deduction! The court chain has been cryptographically certified under BSAC!");
-      
-      // Auto-certify all DIGITAL evidence in inventory as a major prize!
-      setGameState(prev => ({
-        ...prev,
-        justiceScore: Math.min(100, prev.justiceScore + 20),
-        legalScore: Math.min(100, prev.legalScore + 15),
-        inventory: prev.inventory.map(e => {
-          if (e.type === 'DIGITAL') {
-            return {
-              ...e,
-              authenticity: AuthenticityStatus.VERIFIED,
-              admissibility: AdmissibilityStatus.ADMITTED,
-              hasBSACertificate: true,
-              admissibilityStrength: 95,
-              courtConfidence: Math.round(0.6 * (e.credibility || 75) + 0.4 * 95)
-            };
-          }
-          return e;
-        })
-      }));
-    } else {
-      setTimelineSolved(false);
-      setTimelineFeedback("CHRONOLOGY ALIGNMENT ERROR: The metadata packets do not align. Look closely at the timestamps. Propping up a transaction *before* the scam call was placed would break immediate causality loops!");
-      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 8) }));
+    // Check if any item lacks an associated evidence piece
+    const hasMissingLinks = timelineItems.some(item => !item.associatedEvidenceId);
+    if (hasMissingLinks) {
+       setTimelineSolved(false);
+       audioService.playBuzzer();
+       setTimelineFeedback("UNRESOLVED COHERENCE GAP! Please select and link a verified collected exhibit from your inventory for each timeline node to back up your causality model.");
+       return;
     }
+
+    if (!hasOrderCorrect) {
+      setTimelineSolved(false);
+      audioService.playBuzzer();
+      setTimelineFeedback("CHRONOLOGY ALIGNMENT ERROR! Causality chronology is broken. Placing events out of sequence compromises immediate temporal logic! Use the Up (▲) and Down (▼) buttons on each row to arrange them correctly (from 10:00 AM, to 10:30 AM, to 11:00 AM).");
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 8) }));
+      return;
+    }
+
+    // Now check if linked evidence matches expected evidence
+    const incorrectLinks = timelineItems.filter(item => item.associatedEvidenceId !== item.expectedEvidenceId);
+    if (incorrectLinks.length > 0) {
+       setTimelineSolved(false);
+       audioService.playBuzzer();
+       
+       // Generate clear, detailed diagnostic feedback based on which link is mismatched (high cognitive feedback)
+       const firstMismatched = incorrectLinks[0];
+       let hint = "";
+       if (firstMismatched.id === 't-cbi') {
+          hint = "The 10:00 AM WhatsApp call sequence requires evidence demonstrating VoIP international trunk timezone spoofing to expose the claimed 'local Lucknow barracks' alibi!";
+       } else if (firstMismatched.id === 't-safe') {
+          hint = "The 10:30 AM escrow coercion sequence relies on an official visual identity claim! Search for an exhibit that proves a synthesized pixel overlay uniform fake badge!";
+       } else if (firstMismatched.id === 't-cji') {
+          hint = "The 11:00 AM Supreme Court convocation alibi requires absolute daily physical evidence. Pair it with the daily print paper clipping to verify physical New Delhi location!";
+       }
+       
+       setTimelineFeedback(`FORENSIC EVIDENCE ANALYSIS OVERLAP ERROR at [0${currentOrderIds.indexOf(firstMismatched.id) + 1}]. ${hint}`);
+       setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 8) }));
+       return;
+    }
+
+    // Since both order AND mapped evidence are 100% correct
+    setTimelineSolved(true);
+    audioService.playSuccess();
+    setTimelineFeedback("COHERENT FORENSIC TIMELINE RECONSTRUCTED SUCCESSFUL! Outstanding detective work! By correctly sequencing the events and tying your scientific exhibits directly to the claims, you have established the 'Temporal Impossibility'. Inspector Amit Sen claimed he was present in Lucknow at 10:45 AM, but your Daily print clipping proves the CJI was presiding in Delhi SC-Room 1 at 11:00 AM, making a Lucknow alibi physically preposterous. Your entire digital dockets are legally certified as 100% authentic and admitted under BSA Sec 63!");
+    
+    // Auto-certify all DIGITAL evidence in inventory as a major prize!
+    setGameState(prev => ({
+      ...prev,
+      justiceScore: Math.min(100, prev.justiceScore + 30),
+      legalScore: Math.min(100, prev.legalScore + 20),
+      pressureMeter: Math.max(0, prev.pressureMeter - 15),
+      inventory: prev.inventory.map(e => ({
+        ...e,
+        authenticity: AuthenticityStatus.VERIFIED,
+        admissibility: AdmissibilityStatus.ADMITTED,
+        hasBSACertificate: true,
+        admissibilityStrength: 98,
+        courtConfidence: Math.round(0.6 * (e.credibility || 85) + 0.4 * 98)
+      }))
+    }));
   };
 
   const nextPhase = () => {
@@ -674,38 +738,77 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                     {timelineItems.map((item, index) => (
                        <div 
                          key={item.id}
-                         className={`p-4 border border-[#1F2833] bg-[#1B222C]/70 shadow-lg flex items-center justify-between gap-4 transition-all duration-300 ${timelineSolved ? 'border-[#6FCF97]/40 bg-[#6FCF97]/5' : ''}`}
+                         className={`p-4 border border-[#1F2833] bg-[#1B222C]/70 shadow-lg flex flex-col gap-3 transition-all duration-300 ${timelineSolved ? 'border-[#6FCF97]/40 bg-[#6FCF97]/5' : ''}`}
                        >
-                         <div className="flex items-center gap-4">
-                            <div className="w-8 h-8 rounded-full bg-black/50 border border-[#1F2833] flex items-center justify-center text-xs font-bold font-mono text-[#66FCF1]">
-                               0{index + 1}
-                            </div>
-                            <div className="space-y-0.5 max-w-xl">
-                               <div className="text-xs font-bold text-white leading-relaxed">{item.label}</div>
-                               <div className="flex gap-2 text-[9px] mono text-[#C5C6C7]/50 uppercase">
-                                  <span>Source: {item.source}</span>
-                                  <span>//</span>
-                                  <span className="text-[#66FCF1] font-bold">{item.timeLabel}</span>
+                         <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                               <div className="w-8 h-8 rounded-full bg-black/50 border border-[#1F2833] flex items-center justify-center text-xs font-bold font-mono text-[#66FCF1]">
+                                  0{index + 1}
                                </div>
+                               <div className="space-y-0.5 max-w-xl">
+                                  <div className="text-xs font-bold text-white leading-relaxed">{item.label}</div>
+                                  <div className="flex gap-2 text-[9px] mono text-[#C5C6C7]/50 uppercase">
+                                     <span>Source: {item.source}</span>
+                                     <span>//</span>
+                                     <span className="text-[#66FCF1] font-bold">{item.timeLabel}</span>
+                                  </div>
+                               </div>
+                            </div>
+
+                            {/* Arrow Sorting Controls */}
+                            <div className="flex gap-2 shrink-0">
+                               <button 
+                                 onClick={() => moveTimelineItem(index, 'up')}
+                                 disabled={index === 0 || timelineSolved}
+                                 className="w-8 h-8 border border-[#1F2833] bg-black/40 text-[#C5C6C7]/60 hover:text-[#66FCF1] flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none"
+                               >
+                                  ▲
+                               </button>
+                               <button 
+                                 onClick={() => moveTimelineItem(index, 'down')}
+                                 disabled={index === timelineItems.length - 1 || timelineSolved}
+                                 className="w-8 h-8 border border-[#1F2833] bg-black/40 text-[#C5C6C7]/60 hover:text-[#66FCF1] flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none"
+                               >
+                                  ▼
+                               </button>
                             </div>
                          </div>
 
-                         {/* Arrow Sorting Controls */}
-                         <div className="flex gap-2 shrink-0">
-                            <button 
-                              onClick={() => moveTimelineItem(index, 'up')}
-                              disabled={index === 0 || timelineSolved}
-                              className="w-8 h-8 border border-[#1F2833] bg-black/40 text-[#C5C6C7]/60 hover:text-[#66FCF1] flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none"
-                            >
-                               ▲
-                            </button>
-                            <button 
-                              onClick={() => moveTimelineItem(index, 'down')}
-                              disabled={index === timelineItems.length - 1 || timelineSolved}
-                              className="w-8 h-8 border border-[#1F2833] bg-black/40 text-[#C5C6C7]/60 hover:text-[#66FCF1] flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none"
-                            >
-                               ▼
-                            </button>
+                         {/* Interactive Clue Dropdown Association Board */}
+                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-black/50 p-2.5 border border-[#1F2833]/60">
+                            <span className="mono text-[8px] uppercase tracking-wider text-[#C5C6C7]/50 font-bold">Associate Forensic Proof:</span>
+                            <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+                               <select 
+                                 value={item.associatedEvidenceId || ''} 
+                                 disabled={timelineSolved}
+                                 onChange={(e) => {
+                                   const val = e.target.value;
+                                   associateEvidenceToTimelineItem(item.id, val ? val : null);
+                                 }}
+                                 className="bg-[#0B0C10] text-[#C5C6C7] border border-[#1F2833] text-[11px] px-2 py-1.5 focus:outline-none focus:border-[#66FCF1] min-w-[210px] cursor-pointer focus:ring-1 focus:ring-[#66FCF1]"
+                               >
+                                 <option value="">-- LINK COGNITIVE EXHIBIT CONTRADICTION --</option>
+                                 {gameState.inventory.map(ev => (
+                                   <option key={ev.id} value={ev.id}>
+                                     {ev.name} [Status: {ev.authenticity}]
+                                   </option>
+                                 ))}
+                               </select>
+                               
+                               {item.associatedEvidenceId ? (
+                                 <div className={`flex items-center gap-1.5 px-2 py-1 text-[8px] font-bold uppercase mono border ${
+                                    item.associatedEvidenceId === item.expectedEvidenceId 
+                                      ? 'text-[#6FCF97] bg-[#6FCF97]/10 border-[#6FCF97]/20 shadow-[0_0_8px_rgba(111,207,151,0.15)]' 
+                                      : 'text-red-400 bg-red-950/20 border-red-900/20 animate-pulse'
+                                 }`}>
+                                    {item.associatedEvidenceId === item.expectedEvidenceId ? '✓ CAUSALITY CONFIRMED' : '✘ HYPOTHESIS MISMATCH'}
+                                 </div>
+                               ) : (
+                                 <div className="text-[8px] opacity-40 italic mono uppercase text-amber-500">
+                                    ⚡ Unassigned Node Proof
+                                 </div>
+                               )}
+                            </div>
                          </div>
                        </div>
                     ))}

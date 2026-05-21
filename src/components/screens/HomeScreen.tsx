@@ -1,12 +1,18 @@
 import { motion } from 'motion/react';
 import { CASES } from '../../constants';
 import { Scale, ChevronRight } from 'lucide-react';
+import { audioService } from '../../game/audio';
 
 interface HomeScreenProps {
   onStartCase: (id: string) => void;
 }
 
 export default function HomeScreen({ onStartCase }: HomeScreenProps) {
+  const handleStart = (id: string) => {
+    audioService.playSuccess();
+    onStartCase(id);
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-paper-dark p-6 md:p-12 overflow-y-auto">
       <div className="max-w-6xl mx-auto w-full space-y-8 md:space-y-12">
@@ -54,7 +60,7 @@ export default function HomeScreen({ onStartCase }: HomeScreenProps) {
                 </div>
 
                 <button 
-                  onClick={() => onStartCase(caseItem.id)}
+                  onClick={() => handleStart(caseItem.id)}
                   className="btn-accent w-full py-4 text-[10px] md:text-[11px] font-bold uppercase tracking-widest mt-auto shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
                 >
                   Mount Investigation
