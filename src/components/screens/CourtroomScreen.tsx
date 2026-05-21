@@ -18,7 +18,9 @@ import {
   CheckCircle2,
   XCircle,
   TrendingDown,
-  ChevronRight
+  ChevronRight,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 interface CourtroomScreenProps {
@@ -39,6 +41,12 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   const [selectedOptionOutcome, setSelectedOptionOutcome] = useState<TrialStepOption | null>(null);
   const [pressureAnim, setPressureAnim] = useState(false);
   const [objectionFlash, setObjectionFlash] = useState(false);
+  const [isMuted, setIsMuted] = useState(audioService.getIsMuted());
+
+  const handleToggleMute = () => {
+    const nextMute = audioService.toggleMute();
+    setIsMuted(nextMute);
+  };
 
   // Background tension audio pulse setup
   useEffect(() => {
@@ -273,7 +281,50 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   const isUnderPressure = gameState.pressureMeter > 50;
 
   return (
-    <div className={`flex-1 flex flex-col bg-[#2A1810] overflow-hidden transition-all duration-500 ${isUnderPressure ? 'animate-shake animate-glitch border-4 border-red-900 shadow-[inset_0_0_80px_rgba(239,68,68,0.25)]' : ''} ${pressureAnim ? 'bg-red-900/20' : ''}`}>
+    <div className={`relative flex-1 flex flex-col bg-[#2A1810] overflow-hidden transition-all duration-500 ${isUnderPressure ? 'animate-shake animate-glitch border-4 border-red-900 shadow-[inset_0_0_80px_rgba(239,68,68,0.25)]' : ''} ${pressureAnim ? 'bg-red-900/20' : ''}`}>
+      {/* High-impact Phoenix Wright Styled Objection Splash Screen */}
+      <AnimatePresence>
+        {objectionFlash && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-red-950/95 pointer-events-none overflow-hidden select-none"
+          >
+            {/* Pulsing hazard strobe bands */}
+            <div className="absolute inset-x-0 h-48 bg-accent rotate-[-6deg] flex items-center justify-center shadow-[0_0_100px_rgba(218,61,44,0.9)] border-y-4 border-white animate-pulse">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.25)_50%,transparent_100%)]" />
+            </div>
+            
+            {/* Dramatic popping core text */}
+            <motion.div
+              initial={{ y: 80, rotate: -6, scale: 0.7 }}
+              animate={{ y: 0, rotate: -6, scale: 1.25 }}
+              transition={{ type: 'spring', damping: 6, stiffness: 120 }}
+              className="relative z-10 flex flex-col items-center justify-center"
+            >
+              {/* Back Drop Shadow */}
+              <div className="absolute inset-0 translate-x-3 translate-y-3 bg-black text-[65px] md:text-[100px] font-sans font-black tracking-wider uppercase italic select-none">
+                OBJECTION!
+              </div>
+              
+              {/* Core Text */}
+              <div className="text-[65px] md:text-[100px] font-sans font-black tracking-wider uppercase italic text-white drop-shadow-[0_8px_20px_rgba(0,0,0,0.9)] leading-none select-none">
+                OBJECTION!
+              </div>
+              
+              {/* Danger Warning Protocol bar */}
+              <div className="px-4 py-1.5 bg-black border-2 border-amber-500 text-amber-500 text-[9px] md:text-[11px] uppercase font-mono tracking-[0.25em] font-bold mt-3 rotate-[1deg]">
+                ⚡ DOCKET CONTRADICTION DETECTED ⚡
+              </div>
+            </motion.div>
+            
+            {/* Laser beams across the view */}
+            <div className="absolute top-0 bottom-0 left-1/3 w-1 bg-white/40 shadow-[0_0_20px_#fff] rotate-[25deg]" />
+            <div className="absolute top-0 bottom-0 right-1/3 w-1 bg-white/40 shadow-[0_0_20px_#fff] rotate-[25deg]" />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Courtroom Header */}
       <div className="h-14 md:h-16 border-b-2 border-[#1A0D08] bg-[#3D251C] flex items-center px-4 md:px-8 justify-between shrink-0 text-amber-50 shadow-lg">
         <div className="flex items-center gap-3">
@@ -295,6 +346,16 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                  ⚡ Bench Irritation: Max
               </span>
            )}
+           <button
+             onClick={handleToggleMute}
+             className={`px-3 py-1.5 border transition-all flex items-center gap-1.5 focus:outline-none ${isMuted ? 'border-red-900/60 bg-red-950/40 text-red-400 hover:text-red-300' : 'border-[#5A3D2D] bg-[#1A0D08]/50 text-[#C5C6C7] hover:text-[#66FCF1] hover:border-[#66FCF1]'}`}
+             title={isMuted ? "Unmute Synthetic Tension Audio" : "Mute Synthetic Tension Audio"}
+           >
+             {isMuted ? <VolumeX size={12} className="text-red-400 animate-pulse" /> : <Volume2 size={12} className="text-[#66FCF1]" />}
+             <span className="mono text-[8.5px] font-bold tracking-widest hidden sm:inline uppercase">
+               {isMuted ? "MUTE" : "AUDIO ON"}
+             </span>
+           </button>
            <div className="status-chip bg-[#1A0D08] text-amber-200 border-[#5A3D2D] text-[8px] tracking-widest uppercase">In Session</div>
         </div>
       </div>
