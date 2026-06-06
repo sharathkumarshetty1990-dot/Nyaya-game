@@ -33,6 +33,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   const [step, setStep] = useState(0);
   const [showContradiction, setShowContradiction] = useState(false);
   const [selectedContradictionId, setSelectedContradictionId] = useState<string | null>(null);
+  const [selectedReliability, setSelectedReliability] = useState<'deception' | 'memory_error' | 'pressure' | 'procedural_confusion' | null>(null);
   const [contradictionResult, setContradictionResult] = useState<{
     status: 'success' | 'failure' | 'inadmissible' | 'strong' | 'partial' | 'weak' | null;
     message: string;
@@ -85,6 +86,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
           setObjectionFlash(false);
           setShowContradiction(true);
           setSelectedContradictionId(null);
+          setSelectedReliability(null);
           setContradictionResult({ status: null, message: '' });
         }, 1100);
       } else {
@@ -154,56 +156,72 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     const selectedItem = gameState.inventory.find(e => e.id === selectedContradictionId);
     if (!selectedItem) return;
 
-    // We grade outcome depending on the specific item they select to impeachment the alibi:
-    if (selectedItem.id === 'newspaper-cji') {
-      // Correct item
-      if (GameEngine.isEvidenceAdmissible(selectedItem)) {
-        audioService.playSuccess();
-        setContradictionResult({
-          status: 'strong',
-          message: `STRONG CONTRADICTION ACCEPTED! You stand up and raise the certified physical newspaper clipping showing the CJI in Delhi on April 14th! You demonstrate to the bench that the Chief Justice of India was sitting on active judicial benches in New Delhi until late morning, concluding after 11:00 AM. This makes Inspector Amit Sen's claim that the Chief Justice was on an early secret call with him in the Lucknow High Court cyber barracks a logistical and spatial fabrication. Justice Singh slams his gavel: 'A physical record of the daily courts cannot be overruled by loose digital logs. The transcript witness Amit Sen stands deeply discredited. Impeachment established!'`
-        });
-      } else {
-        audioService.playBuzzer();
-        setContradictionResult({
-          status: 'inadmissible',
-          message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the newspaper clipping demonstrating the CJI's New Delhi presence. But because you have NOT yet authenticated and verified this physical clipping on your local Verification screen, the Defense Counsel leaps up: 'Objection! Local newsprint carries zero evidentiary weight without physical custody chain logs!' Justice Singh sustaining: 'Sustained. Until this newspaper's CMYK color dots are authenticated and registered, it remains legally invisible before this bench!'`
-        });
-        setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
-        setPressureAnim(true);
-        setTimeout(() => setPressureAnim(false), 500);
-      }
-    } else if (selectedItem.id === 'wa-ss') {
-      // Partial contradiction
-      audioService.playBuzzer();
-      setContradictionResult({
-        status: 'partial',
-        message: `PARTIAL CONTRADICTION! You present the WhatsApp Screenshot detailing an international VoIP call mask starting with +44. You claim the call routed from European trunk nodes contradicts the assertion that they sync local Lucknow barracks logs. The Defense Counselor rolls his eyes: 'Scammers use dynamic international spoof routing maps all the time. That has zero bearing on where Inspector Sen was physically sitting!' Justice Singh shakes his head slightly: 'It is a suspicious discrepancy, Counsel, but far from conclusive. It does not physically impeach his presence in Lucknow.' (Advancing with weakened persuasive weight)`
-      });
-      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 5) }));
-      setPressureAnim(true);
-      setTimeout(() => setPressureAnim(false), 500);
-    } else if (selectedItem.id === 'cbi-logo') {
-      // Weak contradiction
-      audioService.playBuzzer();
-      setContradictionResult({
-        status: 'weak',
-        message: `WEAK CONTRADICTION! You raise the CBI uniform logo grab with pixelated compression crops to prove a simulated badge. Defense objects: 'Under BSA, minor rendering and pixel overlays do not refute physical locations! The Inspector might have had a poorly printed vest. How does poor thread resolution prove he wasn't there?' The Judge sighs in deep irritation: 'Sustained. Digital insignia compression is emotionally suggestive but completely fails to refute the spatial timeline. Do not waste the bench's time with speculative visual theories.'`
-      });
-      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 10) }));
-      setPressureAnim(true);
-      setTimeout(() => setPressureAnim(false), 500);
-    } else {
-      // General failure
+    // Check if step expects a contradiction
+    const expectedEvidenceId = trialStep.contradictionEvidenceId;
+    const expectedReliability = trialStep.reliabilityReason;
+
+    if (!expectedEvidenceId) return;
+
+    // 1. Check if the player selected the correct evidence
+    if (selectedItem.id !== expectedEvidenceId) {
       audioService.playBuzzer();
       setContradictionResult({
         status: 'failure',
-        message: `MISTAKEN DEDUCTION! You present the ${selectedItem.name} to challenge Inspector Amit Sen's transcript log. The Defense Counsel scoffs: 'Counsel is shooting in the dark. How does this exhibit prove a scheduling anomaly?' Justice G. Singh shakes his head in deep irritation, warning you not to waste the court's time.`
+        message: `MISTAKEN DEDUCTION! You stand and present the ${selectedItem.name} to challenge the witness's statement. The Defense Counsel scoffs: "Counsel is shooting in the dark. How does this exhibit prove a logical contradiction?" Justice G. Singh shakes his head in deep irritation, warning you: "Counsel, do not waste this bench's time with unrelated dockets. Focus on the core of the testimony!"`
       });
       setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
       setPressureAnim(true);
       setTimeout(() => setPressureAnim(false), 500);
+      return;
     }
+
+    // 2. Check if the player evaluated the reliability cause (if expected)
+    if (expectedReliability && selectedReliability !== expectedReliability) {
+      audioService.playBuzzer();
+      setContradictionResult({
+        status: 'weak',
+        message: `EXHIBIT CORRECT, BUT LEGAL DIAGNOSIS WRONG! You successfully present the correct evidence (${selectedItem.name}), but your evaluation of why the testimony is unreliable is incorrect. You argued that the root cause was ${selectedReliability?.replace('_', ' ').toUpperCase() || 'none selected'}. The Defense Counsel stands up: "While the document itself poses historical questions, Counsel's legal reasoning for why the witness's testimony is compromised is wholly speculative and incorrect!" Justice Singh agrees: "Counsel, presenting the right file is only half your responsibility. You must display a correct legal diagnosis of the testimony unreliability mechanism. Re-evaluate your forensic model immediately!"`
+      });
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 10) }));
+      setPressureAnim(true);
+      setTimeout(() => setPressureAnim(false), 500);
+      return;
+    }
+
+    // 3. Check if the evidence is admissible (BSA sec 63 verification compliance)
+    const isAdmissible = GameEngine.isEvidenceAdmissible(selectedItem);
+    if (!isAdmissible) {
+      audioService.playBuzzer();
+      setContradictionResult({
+        status: 'inadmissible',
+        message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the correct item and accurately diagnose the unreliability cause as ${expectedReliability?.replace('_', ' ').toUpperCase()}. However, because you did NOT authenticate and certify this digital exhibit in the forensic Verification Suite, the Defense Counsel leaps up: "Objection! Under Bharatiya Sakshya Adhiniyam Section 63, electronic logs are legally inadmissible without a fully signed BSA digital hash certificate!" Justice G. Singh nods with professional regret: "Sustained. Excellent legal deduction and diagnosis, Counsel, but I cannot legally admit uncertified digital material. You must verify your files before you can wield them as dockets in my court!"`
+      });
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
+      setPressureAnim(true);
+      setTimeout(() => setPressureAnim(false), 500);
+      return;
+    }
+
+    // 4. Double success! Give specific narrative feedback based on the unreliability reason:
+    audioService.playSuccess();
+    let message = '';
+    
+    if (expectedReliability === 'pressure') {
+      message = `STRONG CONTRADICTION ACCEPTED! You stand up and present the WhatsApp Call Screenshot showing international +44 calling masks. You argue that the transfer agreement was signed by the victim under extreme digital arrest pressure and live video coercion, rendering his voluntary signature legally null and void under BNS Section 308! Justice Singh slams his gavel: "A signature obtained under live cyber sequestration is a product of terror. The victim's compliance was completely due to direct PRESSURE, not voluntary consent. Impeachment established!"`;
+    } else if (expectedReliability === 'memory_error') {
+      message = `STRONG CONTRADICTION ACCEPTED! You project the CBI uniform logo from the scammers' feed showing high-compression pixel crops and block distortions. You prove that there was never any physical golden bronze logo stamp, demonstrating that Sub-Inspector Mishra's memory of a pristine metallic crest was an honest mental reconstruction and memory error. Justice Singh agrees: "Human memory under direct pressure is reconstructive. SI Mishra's memory is falsified by the digital artifact. It is a clear MEMORY ERROR. Impeachment established!"`;
+    } else if (expectedReliability === 'deception') {
+      message = `STRONG CONTRADICTION ACCEPTED! You project the physical Lucknow Times print clipping showing the Chief Justice on live hearings in Delhi. You prove that the scammers' alibi of a secret Lucknow barracks directive is a complete, deliberate lie. Justice Singh's expression turns thunderous: "Amit Sen's statement is neither pressure nor a memory mistake. This is calculated, perjury and DECEPTION to execute a digital arrest. Impeachment established!"`;
+    } else if (expectedReliability === 'procedural_confusion') {
+      message = `STRONG CONTRADICTION ACCEPTED! You present the Hazratganj Zero FIR Complaint Receipt. You explain that under BNSS Section 173, police are mandated to record cyber complaints immediately regardless of territorial lines, proving Dixit's territorial refusal was sheer protocol misunderstanding. Justice Singh rules: "Our new codes mandate immediate report recording to lock packet logs. Dixit was bound by old geographic conventions—a case of PROCEDURAL CONFUSION. Impeachment established!"`;
+    } else {
+      message = `STRONG CONTRADICTION ACCEPTED! You present the ${selectedItem.name} and successfully impeach the witness's statement! G. Singh strikes his gavel: "Clear contradiction established. Counsel has cleanly dismantled this point."`;
+    }
+
+    setContradictionResult({
+      status: 'strong',
+      message
+    });
   };
 
   const confirmContradictionClose = () => {
@@ -231,6 +249,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       // Let them retry or correct, but they already took the pressure penalties in handleExecuteContradiction
       setContradictionResult({ status: null, message: '' });
       setSelectedContradictionId(null);
+      setSelectedReliability(null);
     }
   };
 
@@ -609,59 +628,93 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                            {contradictionResult.status === null ? (
                              <>
                                {/* Selector */}
-                               <div className="space-y-3">
-                                  <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">Select Contradiction Exhibit</div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
-                                     {gameState.inventory.map(item => {
-                                        const isSelected = selectedContradictionId === item.id;
-                                        const isAdmissible = GameEngine.isEvidenceAdmissible(item);
-                                        return (
-                                           <button
-                                              key={item.id}
-                                              onClick={() => setSelectedContradictionId(item.id)}
-                                              className={`p-3 text-left border-2 transition-all relative flex flex-col justify-center ${
-                                                 isSelected 
-                                                   ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)]'
-                                                   : 'bg-black/30 border-[#5A3D2D] hover:border-amber-900/60'
-                                              }`}
-                                           >
-                                              <div className="font-bold text-[10px] text-amber-100 truncate w-full mb-1">{item.name}</div>
-                                              <div className="flex justify-between items-center text-[8px] w-full">
-                                                 <span className="mono opacity-40 uppercase">{item.type}</span>
-                                                 <span className={`mono font-bold ${isAdmissible ? 'text-accent-green' : 'text-accent'}`}>
-                                                    {isAdmissible ? 'ADMITTED // READY' : 'UNCERTIFIED // REJECTABLE'}
-                                                 </span>
-                                              </div>
-                                           </button>
-                                        );
-                                     })}
-                                     {gameState.inventory.length === 0 && (
-                                        <div className="text-center p-6 text-xs text-amber-100/40 italic bg-black/30 col-span-2">
-                                           You have collected zero materials in your case docket as legal basis.
-                                        </div>
-                                     )}
+                               <div className="space-y-4">
+                                  <div className="space-y-2">
+                                     <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">1. Select Contradiction Exhibit Documentation</div>
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[160px] overflow-y-auto pr-1">
+                                        {gameState.inventory.map(item => {
+                                           const isSelected = selectedContradictionId === item.id;
+                                           const isAdmissible = GameEngine.isEvidenceAdmissible(item);
+                                           return (
+                                              <button
+                                                 key={item.id}
+                                                 onClick={() => setSelectedContradictionId(item.id)}
+                                                 className={`p-3 text-left border-2 transition-all relative flex flex-col justify-center cursor-pointer ${
+                                                    isSelected 
+                                                      ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)]'
+                                                      : 'bg-black/30 border-[#5A3D2D] hover:border-amber-900/60'
+                                                 }`}
+                                              >
+                                                 <div className="font-bold text-[10px] text-amber-100 truncate w-full mb-1">{item.name}</div>
+                                                 <div className="flex justify-between items-center text-[8px] w-full">
+                                                    <span className="mono opacity-40 uppercase">{item.type}</span>
+                                                    <span className={`mono font-bold ${isAdmissible ? 'text-accent-green' : 'text-accent'}`}>
+                                                       {isAdmissible ? 'ADMITTED // READY' : 'UNCERTIFIED // REJECTABLE'}
+                                                    </span>
+                                                 </div>
+                                              </button>
+                                           );
+                                        })}
+                                        {gameState.inventory.length === 0 && (
+                                           <div className="text-center p-6 text-xs text-amber-100/40 italic bg-black/30 col-span-2 font-mono">
+                                              You have collected zero materials in your case docket as legal basis. Go back and check hotspots.
+                                           </div>
+                                        )}
+                                     </div>
                                   </div>
+
+                                  {trialStep.reliabilityReason && (
+                                     <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30">
+                                        <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
+                                           2. Evaluate Testimony Reliability Cause
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                           {[
+                                              { id: 'deception', label: 'DECEPTION', color: 'border-red-500/30 text-red-100 hover:border-red-400', bg: 'bg-red-950/20', desc: 'Intentional lie / spoofing' },
+                                              { id: 'memory_error', label: 'MEMORY ERROR', color: 'border-amber-500/30 text-amber-100 hover:border-amber-400', bg: 'bg-amber-950/20', desc: 'Honest memory recall gap' },
+                                              { id: 'pressure', label: 'PRESSURE', color: 'border-blue-500/30 text-blue-100 hover:border-blue-400', bg: 'bg-blue-950/20', desc: 'Coercion / threat / fear' },
+                                              { id: 'procedural_confusion', label: 'PROCEDURAL CONFUSION', color: 'border-emerald-500/30 text-emerald-100 hover:border-emerald-400', bg: 'bg-emerald-950/20', desc: 'Statutory or law mistake' }
+                                           ].map(r => {
+                                              const isSel = selectedReliability === r.id;
+                                              return (
+                                                 <button
+                                                    key={r.id}
+                                                    onClick={() => setSelectedReliability(r.id as any)}
+                                                    className={`p-2.5 text-left border-2 transition-all relative flex flex-col justify-center cursor-pointer ${
+                                                       isSel 
+                                                         ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)] bg-accent/20 border-accent/90' 
+                                                         : `${r.bg} ${r.color}`
+                                                    }`}
+                                                 >
+                                                    <span className="font-bold text-[9px] tracking-wider block">{r.label}</span>
+                                                    <span className="text-[7.5px] opacity-40 italic mt-0.5">{r.desc}</span>
+                                                 </button>
+                                              );
+                                           })}
+                                        </div>
+                                     </div>
+                                  )}
                                </div>
 
                                <button 
-                                   disabled={!selectedContradictionId}
+                                   disabled={!selectedContradictionId || (!!trialStep.reliabilityReason && !selectedReliability)}
                                    onClick={handleExecuteContradiction}
-                                   className={`w-full py-4 border-2 uppercase font-bold text-[10px] tracking-widest shadow-md transition-all ${
-                                      selectedContradictionId
+                                   className={`w-full py-4 border-2 uppercase font-bold text-[10px] tracking-widest shadow-md transition-all cursor-pointer ${
+                                      selectedContradictionId && (!trialStep.reliabilityReason || selectedReliability)
                                         ? 'bg-accent text-white border-accent hover:bg-black hover:text-white'
                                         : 'bg-[#180E0A] text-amber-100/20 border-amber-950/20 cursor-not-allowed'
                                    }`}
                                >
-                                   VERIFY DOCKET CONTRADICTION
+                                   VERIFY DOCKET CONTRADICTION & RELIABILITY
                                </button>
                              </>
                            ) : (
                              /* Feedback Panel */
                              <div className="space-y-6">
                                 <div className={`p-5 border flex items-start gap-4 ${
-                                   contradictionResult.status === 'success' 
-                                     ? 'bg-green-950/20 border-green-500/30 text-green-200'
-                                     : 'bg-red-950/20 border-red-500/30 text-red-200'
+                                   ['success', 'strong', 'partial'].includes(contradictionResult.status || '') 
+                                     ? 'bg-emerald-950/30 border-emerald-500/55 text-emerald-200'
+                                     : 'bg-red-950/20 border-red-500/35 text-red-200'
                                 }`}>
                                    {(contradictionResult.status === 'success' || contradictionResult.status === 'strong' || contradictionResult.status === 'partial') ? (
                                       <CheckCircle2 size={24} className="text-accent-green shrink-0 mt-0.5" />
@@ -676,7 +729,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
 
                                 <button 
                                     onClick={confirmContradictionClose}
-                                    className="bg-accent text-white mono font-bold text-[10px] w-full py-4 border-2 border-[#5A3D2D] hover:bg-black uppercase tracking-[0.2em]"
+                                    className="bg-accent text-white mono font-bold text-[10px] w-full py-4 border-2 border-[#5A3D2D] hover:bg-black uppercase tracking-[0.2em] cursor-pointer"
                                 >
                                     {(contradictionResult.status === 'success' || contradictionResult.status === 'strong' || contradictionResult.status === 'partial') ? 'DISCREDIT & CONTINUE' : 'RETRY ACTIVE DEDUCTION'}
                                 </button>

@@ -117,6 +117,7 @@ export interface TrialStep {
   options?: TrialStepOption[];
   requiredEvidenceIds?: string[];
   contradictionEvidenceId?: string;
+  reliabilityReason?: 'deception' | 'memory_error' | 'pressure' | 'procedural_confusion';
   impactOnPressure?: number;
   impactOnJustice?: number;
   narrativeStateNote?: string; // e.g. "Judge leaning forward", "Witness wiping palms"

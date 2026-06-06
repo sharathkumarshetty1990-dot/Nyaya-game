@@ -92,5 +92,19 @@ export const EVIDENCE_POOL: Evidence[] = [
     hasBSACertificate: false,
     linkedEvidenceIds: [],
     supports: ['wa-ss']
+  },
+  {
+    id: 'zero-fir-receipt',
+    name: 'Zero FIR Complaint Receipt',
+    description: 'An official police stamp receipt registered under BNSS 173 showing the Hazratganj station registered the complaint despite regional jurisdiction limits.',
+    type: EvidenceType.PHYSICAL,
+    authenticity: AuthenticityStatus.VERIFIED,
+    admissibility: AdmissibilityStatus.ADMITTED,
+    courtConfidence: 100,
+    credibility: 90,
+    admissibilityStrength: 95,
+    judgeImpact: 70,
+    hasBSACertificate: false,
+    linkedEvidenceIds: []
   }
 ];

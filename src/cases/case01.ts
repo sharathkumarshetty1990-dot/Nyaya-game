@@ -21,7 +21,7 @@ const trialFlow: TrialStep[] = [
     id: 'defense-objection-1',
     type: 'objection',
     speaker: 'Defense Counsel',
-    text: "Objection, Your Honor! The prosecution relies heavily on a simple JPEG screenshot of a alleged WhatsApp conversation. Digital files are mere arrangements of pixels, susceptible into infinite forgery! Without a dual-signature certificate as strictly demanded under Bharatiya Sakshya Adhiniyam Sec 63, this 'WhatsApp screenshot' is a digital ghost. It must be summarily excluded!",
+    text: "Objection, Your Honor! The prosecution relies heavily on a simple JPEG screenshot of an alleged WhatsApp conversation. Digital files are mere arrangements of pixels, susceptible into infinite forgery! Without a dual-signature certificate as strictly demanded under Bharatiya Sakshya Adhiniyam Sec 63, this 'WhatsApp screenshot' is a digital ghost. It must be summarily excluded!",
     narrativeStateNote: "The Defense Counsel smugly taps a thick legal binder on the mahogany desk, sensing an open-and-shut exclusion.",
     options: [
       {
@@ -49,7 +49,7 @@ const trialFlow: TrialStep[] = [
       {
         id: 'opt-provoke-scammer',
         text: "Expose CBI Poser Logo Analysis",
-        description: "Point pointing directly to the CBI Logo frame grab. True, it lacks certificates, but it contains specific pixelated compression artifacts that match scammers' known software.",
+        description: "Point directly to the CBI Logo frame grab. True, it lacks certificates, but it contains specific pixelated compression artifacts that match scammers' known software.",
         risks: "May trigger panic. Scammer might object, but it proves the technical spoofing was real and specific.",
         evidenceRequiredId: 'cbi-logo',
         requiresBsaCertificate: false,
@@ -61,13 +61,44 @@ const trialFlow: TrialStep[] = [
     ]
   },
   {
+    id: 'virendra-pressure-check',
+    type: 'statement',
+    speaker: 'Virendra Sharma',
+    text: "Under their pressure, I signed a money transfer declaration stating I was doing it for voluntary reasons with zero duress. But that was because they threatened to frame my daughter. Is my own formal statement valid if I signed it under their live video-feed command?",
+    contradictionEvidenceId: 'wa-ss',
+    reliabilityReason: 'pressure',
+    impactOnJustice: 15,
+    narrativeStateNote: "Virendra's hands shake as he explains the digital coercion that took place."
+  },
+  {
+    id: 'mishra-memory-check',
+    type: 'statement',
+    speaker: 'Sub-Inspector Mishra',
+    text: "When we raided the local cyber cell on April 14th, we found a physical CBI emboss stamp. I clearly remember it was a pristine, officially issued golden metal crest of the Delhi Directorate, and was perfectly centered on the scammers' printouts, meaning they had real high-grade physical stamps.",
+    contradictionEvidenceId: 'cbi-logo',
+    reliabilityReason: 'memory_error',
+    impactOnJustice: 15,
+    narrativeStateNote: "The Sub-Inspector adjusts his stance, confident in his visual recollections of the raid."
+  },
+  {
     id: 'perjury-check',
     type: 'statement',
     speaker: 'CBI Poser (Transcript)',
-    text: "Mr. Sharma was legally detained because our cyber surveillance logs showed his machine communicating with foreign nodes. I, Inspector Amit Sen, personally verified this from the Lucknow High Court cyber barracks on the morning of April 14th.",
+    text: "Mr. Sharma was legally detained because our cyber surveillance logs showed his machine communicating with foreign nodes. I, Inspector Amit Sen, personally verified this from the Lucknow High Court cyber barracks on the morning of April 14th after my meeting with the Chief Justice.",
     contradictionEvidenceId: 'newspaper-cji',
-    impactOnJustice: 10,
+    reliabilityReason: 'deception',
+    impactOnJustice: 15,
     narrativeStateNote: "The transcript log is projected on the courtroom screen. The digital signature on the warrant reads 'Amit_Sen_CBI'."
+  },
+  {
+    id: 'dixit-procedural-check',
+    type: 'statement',
+    speaker: 'Station Officer Dixit',
+    text: "We refused to record the case on April 14th because Hazratganj has no regional territorial authority over Gomti Nagar under old municipal rules. Registrations of complaints is strictly region-locked, regardless of global digital crime contexts.",
+    contradictionEvidenceId: 'zero-fir-receipt',
+    reliabilityReason: 'procedural_confusion',
+    impactOnJustice: 15,
+    narrativeStateNote: "The Station Officer crosses his arms, citing old regional policing conventions to explain the filing delay."
   },
   {
     id: 'final-judgment',
@@ -86,7 +117,7 @@ export const CASE_01: Case = {
   description: 'A retired principal is trapped in a "digital arrest" by scammers posing as CBI. Save him and his savings.',
   lawsTaught: ['BNS 318', 'BNS 308', 'BSA 63'],
   initialNPCs: ['principal-lucknow', 'cbi-poser'],
-  evidenceIds: ['wa-ss', 'cbi-logo', 'newspaper-cji'],
+  evidenceIds: ['wa-ss', 'cbi-logo', 'newspaper-cji', 'zero-fir-receipt'],
   availableBnsSections: ['BNS 318', 'BNS 308'],
   narrativeUrgency: "The victim's bank account has been locked. Every hour delay risks the funds being moved offshore.",
   trialFlow

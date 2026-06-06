@@ -265,6 +265,18 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
                           onClick={() => collectEvidence('newspaper-cji')}
                           isCollected={gameState.inventory.some(e => e.id === 'newspaper-cji')}
                         />
+                        <SceneHotspot 
+                          title="CBI BADGE VEST" 
+                          top="35%" left="30%" 
+                          onClick={() => collectEvidence('cbi-logo')}
+                          isCollected={gameState.inventory.some(e => e.id === 'cbi-logo')}
+                        />
+                        <SceneHotspot 
+                          title="POLICE DOCKET" 
+                          top="45%" left="80%" 
+                          onClick={() => collectEvidence('zero-fir-receipt')}
+                          isCollected={gameState.inventory.some(e => e.id === 'zero-fir-receipt')}
+                        />
                       </>
                     )}
                 </div>
