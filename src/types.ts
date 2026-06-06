@@ -69,10 +69,8 @@ export interface Evidence {
   contentUrl?: string;
   verificationCauses?: string[];
   
-  // Relational Depth
-  linkedEvidenceIds: string[];
-  supports?: string[];
-  requires?: string[];
+  // Factual Findings & Attributes (Empirical Facts, not pre-calculated interpretations)
+  factualProperties?: string[];
 }
 
 export interface LawCard {

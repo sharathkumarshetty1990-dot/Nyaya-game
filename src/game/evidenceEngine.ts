@@ -7,10 +7,22 @@ import { Evidence, AuthenticityStatus, AdmissibilityStatus, GameState } from '..
 export const verifyEvidence = (evidence: Evidence, state: GameState): Evidence => {
   const pressurePenalty = state.pressureMeter > 50 ? 15 : 0;
   
-  // Logical depth: if supporting evidence is already verified, supporting evidence verified is true
-  const supportVerified = evidence.supports?.some(id => 
-    state.inventory.find(e => e.id === id)?.authenticity === AuthenticityStatus.VERIFIED
-  );
+  // Factual alignment check: dynamic corroborative proof from verified evidence in inventory
+  const supportVerified = state.inventory.some(e => {
+    if (e.id === evidence.id || e.authenticity !== AuthenticityStatus.VERIFIED) return false;
+    
+    // Check alignment based on verified attributes on related items
+    if (evidence.id === 'wa-ss') {
+      return e.id === 'cbi-logo' || e.id === 'newspaper-cji';
+    }
+    if (evidence.id === 'cbi-logo') {
+      return e.id === 'wa-ss';
+    }
+    if (evidence.id === 'newspaper-cji') {
+      return e.id === 'wa-ss';
+    }
+    return false;
+  });
 
   const newCredibility = Math.min(100, (evidence.credibility || 30) + (supportVerified ? 40 : 25) - pressurePenalty);
   

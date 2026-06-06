@@ -57,8 +57,11 @@ export const EVIDENCE_POOL: Evidence[] = [
     hasBSACertificate: false,
     authenticityRisk: 'Timestamp mismatch detected. Possible causes: Manual edits, timezone sync issues, or server cache discrepancy.',
     bsaSection: 'BSA 63',
-    linkedEvidenceIds: ['cbi-logo'],
-    supports: ['newspaper-cji']
+    factualProperties: [
+      'Caller Identity Flag: Contains VoIP-spoofed country code prefix (+44 / UK)',
+      'Timestamp: Recorded at 10:00 AM IST on April 14, 2026',
+      'Device Origin: Standard high-density frame buffer export matches victim\'s mobile hardware'
+    ]
   },
   {
     id: 'cbi-logo',
@@ -73,7 +76,11 @@ export const EVIDENCE_POOL: Evidence[] = [
     hasBSACertificate: false,
     authenticityRisk: 'Compression block artifacts. Possible causes: Scam-group video tool compression, raw recording artifacts, or artificial pixel painting.',
     bsaSection: 'BSA 63',
-    linkedEvidenceIds: ['wa-ss']
+    factualProperties: [
+      'Logo Geometry: Standard shape with non-uniform custom-drawn border lines',
+      'Color Profile: High-compression CMYK macro block layout instead of continuous embroidery thread tone',
+      'Origin Profile: Extracted directly from uncertified video stream codec blocks'
+    ]
   },
   {
     id: 'newspaper-cji',
@@ -86,8 +93,11 @@ export const EVIDENCE_POOL: Evidence[] = [
     admissibilityStrength: 90,
     judgeImpact: 85,
     hasBSACertificate: false,
-    linkedEvidenceIds: [],
-    supports: ['wa-ss']
+    factualProperties: [
+      'Publication Date: April 14, 2026, morning edition',
+      'Physical Medium: Genuine low-acid lithographic web newsprint with CMYK rosettes',
+      'Factual Lead Text: Chief Justice G. Singh arrives at Supreme Court Room 1 in New Delhi at 11:00 AM IST for administrative dockets'
+    ]
   },
   {
     id: 'zero-fir-receipt',
@@ -100,6 +110,10 @@ export const EVIDENCE_POOL: Evidence[] = [
     admissibilityStrength: 95,
     judgeImpact: 70,
     hasBSACertificate: false,
-    linkedEvidenceIds: []
+    factualProperties: [
+      'Registration Status: Zero FIR Complaint entered in national portal with serial 822/BNSS173',
+      'Transaction Nature: Purely electronic/cyber transaction targeting Lucknow resident from offsite nodes',
+      'Station Coordinates: Hazratganj station signature stamp valid and catalogued'
+    ]
   }
 ];

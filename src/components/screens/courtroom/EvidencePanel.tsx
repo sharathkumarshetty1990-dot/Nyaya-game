@@ -112,6 +112,22 @@ export default function EvidencePanel({
                   </span>
                 </div>
               </div>
+
+              {/* Empirical Forensic Observations */}
+              {item.factualProperties && (
+                <div className="mt-2 text-left bg-black/10 p-1.5 border border-amber-950/10 text-[8.5px]">
+                  <span className="mono text-[7px] text-amber-500/80 font-bold uppercase tracking-wider block mb-1">
+                    EMPIRICAL FACTS (TESTED OBSERVATIONS)
+                  </span>
+                  <div className="space-y-1">
+                    {item.factualProperties.map((prop, idx) => (
+                      <div key={idx} className="text-amber-100/60 font-sans leading-snug pl-1.5 border-l border-amber-950/30">
+                        • {prop}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

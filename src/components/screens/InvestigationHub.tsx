@@ -497,6 +497,21 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
 
                         <p className="text-xs italic leading-tight text-accent font-medium pt-2">"{selectedEvidence.authenticityRisk || "Incipient artifact authentication pending deep-packet metadata scan."}"</p>
                      </div>
+
+                     {selectedEvidence.factualProperties && (
+                        <div className="p-4 bg-paper-dark border border-line space-y-2 text-left">
+                           <span className="mono text-[8px] opacity-50 uppercase tracking-widest font-bold block">
+                              Empirical Forensic Observations (Facts)
+                           </span>
+                           <ul className="space-y-1.5 list-disc pl-4 text-[10.5.px] md:text-xs text-ink/80 leading-relaxed">
+                              {selectedEvidence.factualProperties.map((prop, idx) => (
+                                 <li key={idx} className="font-sans leading-snug">
+                                    {prop}
+                                 </li>
+                              ))}
+                           </ul>
+                        </div>
+                     )}
                   </div>
 
                   <div className="aspect-video bg-paper-dark border-2 border-line flex flex-col items-center justify-center p-8 relative overflow-hidden">
