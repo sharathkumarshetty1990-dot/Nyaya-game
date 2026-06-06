@@ -405,28 +405,49 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                     <p className="text-xs text-[#C5C6C7]/60 italic">"{selectedEvidence.description}"</p>
                  </div>
 
-                 {/* Integrated Split Scores Display */}
-                 <div className="grid grid-cols-3 gap-2 w-full md:w-auto shrink-0 max-w-md">
-                    <div className="p-3 bg-black/40 border border-[#1F2833] text-left">
-                       <span className="mono text-[8px] opacity-40 uppercase block leading-none mb-1">Authenticity</span>
-                       <span className="mono font-bold text-xs text-[#6FCF97]">{selectedEvidence.credibility || 30}%</span>
-                       <div className="w-12 h-1 bg-black/50 mt-1 relative overflow-hidden">
-                          <div className="h-full bg-[#6FCF97]" style={{ width: `${selectedEvidence.credibility || 30}%` }} />
-                       </div>
-                    </div>
-                    <div className="p-3 bg-black/40 border border-[#1F2833] text-left">
-                       <span className="mono text-[8px] opacity-40 uppercase block leading-none mb-1">Admissibility</span>
-                       <span className="mono font-bold text-xs text-[#66FCF1]">{selectedEvidence.admissibilityStrength || 10}%</span>
-                       <div className="w-12 h-1 bg-black/50 mt-1 relative overflow-hidden">
-                          <div className="h-full bg-[#66FCF1]" style={{ width: `${selectedEvidence.admissibilityStrength || 10}%` }} />
-                       </div>
-                    </div>
-                    <div className="p-3 bg-black/40 border border-[#1F2833] text-left">
-                       <span className="mono text-[8px] opacity-40 uppercase block leading-none mb-1">Bench Sway</span>
-                       <span className="mono font-bold text-xs text-[#DC3D2C]">{selectedEvidence.judgeImpact || 60}%</span>
-                       <div className="w-12 h-1 bg-black/50 mt-1 relative overflow-hidden">
-                          <div className="h-full bg-[#DC3D2C]" style={{ width: `${selectedEvidence.judgeImpact || 60}%` }} />
-                       </div>
+                 {/* Integrated Dynamic Reasoning Pillars Checklist */}
+                 <div className="flex flex-col gap-2 w-full md:w-auto shrink-0 min-w-[280px] bg-black/40 border border-[#1F2833] p-4 text-left">
+                    <span className="mono text-[8px] opacity-50 uppercase block font-bold leading-none mb-2 text-[#66FCF1]">FACTUAL REASONING PILLARS</span>
+                    <div className="space-y-1.5">
+                       {(() => {
+                          const isVer = selectedEvidence.authenticity === AuthenticityStatus.VERIFIED;
+                          const isAdm = selectedEvidence.hasBSACertificate;
+                          let pillars = [
+                            { label: "Metadata Aligned Verified", checked: isVer, detail: "Original server packet origin" },
+                            { label: "Witness Corroborated Verified", checked: isVer, detail: "Oral testimony cross-checked" },
+                            { label: "Sec. 63 custody chain intact", checked: isAdm, detail: "Electronic seal generated" }
+                          ];
+                          if (selectedEvidence.id === 'wa-ss') {
+                             pillars = [
+                               { label: "EXIF Timestamp Offset Extracted", checked: isVer, detail: "UTC shift shows spoofed local call" },
+                               { label: "VoIP Trunk Route Corroborated", checked: isVer, detail: "Identified custom spoof maps" },
+                               { label: "Sec. 63 Custody Chain Intact", checked: isAdm, detail: "Electronic custody chain sealed" }
+                             ];
+                          } else if (selectedEvidence.id === 'cbi-logo') {
+                             pillars = [
+                               { label: "Overlay Boundary Gradient Isolated", checked: isVer, detail: "Synthetic edge structures highlighted" },
+                               { label: "Spectral Textile Density Corroborated", checked: isVer, detail: "Lack of physical stamp confirmed" },
+                               { label: "Sec. 63 Custody Chain Intact", checked: isAdm, detail: "Electronic custody chain sealed" }
+                             ];
+                          } else if (selectedEvidence.id === 'newspaper-cji') {
+                             pillars = [
+                               { label: "Lithographic Rosettes Resolved", checked: isVer, detail: "CMYK micro-dot matrices parsed" },
+                               { label: "CJI Temporal Alibi Corroborated", checked: isVer, detail: "Daily print location validated" },
+                               { label: "Sec. 63 Custody Chain Intact", checked: isAdm, detail: "Electronic custody chain sealed" }
+                             ];
+                          }
+                          return pillars.map((p, pIdx) => (
+                             <div key={pIdx} className="flex items-center gap-2 text-[10px]">
+                                <div className={`w-3.5 h-3.5 flex items-center justify-center border ${p.checked ? 'border-emerald-500 bg-emerald-950/40 text-emerald-400' : 'border-[#1F2833] bg-black/60 text-white/20'}`}>
+                                   {p.checked ? "✓" : "×"}
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                   <span className={`font-semibold ${p.checked ? 'text-[#6FCF97]' : 'text-[#C5C6C7]/40 font-mono text-[9px]'}`}>{p.label}</span>
+                                   <span className="text-[8px] opacity-40 font-sans">{p.detail}</span>
+                                </div>
+                             </div>
+                          ));
+                       })()}
                     </div>
                  </div>
               </div>              {/* Multi-Interactive Layout Grid */}

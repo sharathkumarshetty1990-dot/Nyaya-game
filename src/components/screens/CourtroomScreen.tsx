@@ -776,6 +776,38 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                   )}
                                </div>
 
+                               {selectedContradictionId && selectedReliability && (
+                                  <div className="bg-[#26150F] border border-amber-950/60 p-3.5 space-y-1 text-left font-sans text-xs animate-fadeIn">
+                                     <span className="mono text-[8.5px] text-amber-500 font-bold uppercase tracking-widest block">CONSTRUCTED ARGUMENT SYNTHESIS</span>
+                                     <div className="text-amber-100 font-medium leading-relaxed font-serif">
+                                        {(() => {
+                                           const item = gameState.inventory.find(e => e.id === selectedContradictionId);
+                                           const rName = selectedReliability.replace('_', ' ').toUpperCase();
+                                           let synthesisText = "";
+                                           if (selectedContradictionId === 'wa-ss' && selectedReliability === 'pressure') {
+                                              synthesisText = `Exhibit ${item?.name} provides direct evidence of BNS Sec 308 (Extortion) coercion. The UTC timestamp shift proves VoIP spoofing was active during the forced declaration, demonstrating extreme psychological pressure.`;
+                                           } else if (selectedContradictionId === 'cbi-logo' && selectedReliability === 'memory_error') {
+                                              synthesisText = `SI Mishra recalled recovering a physical 'gold seal stamp'. However, spectral analysis of the CBI logo overlay proves the crest was entirely synthetic, demonstrating a classic cognitive memory error under high-stress pressure.`;
+                                           } else if (selectedContradictionId === 'newspaper-cji' && selectedReliability === 'deception') {
+                                              synthesisText = `The CBI Transcript claims Amit Sen met the CJI in Lucknow on April 14th. Challenging this with the physical Daily Newspaper proves CJI was actually presiding in New Delhi, confirming deliberate alibi deception (Perjury).`;
+                                           } else if (selectedContradictionId === 'zero-fir-receipt' && selectedReliability === 'procedural_confusion') {
+                                              synthesisText = `Officer Dixit refused complaint registration due to 'out-of-district' limits. The Zero FIR receipt and BNSS Sec 173 mandate instant digital complaint registration, demonstrating territorial procedural confusion.`;
+                                           } else {
+                                              synthesisText = `Supporting ${rName} with ${item?.name} to demonstrate a discrepancy in the witness's testimony.`;
+                                           }
+                                           return (
+                                              <>
+                                                 <p className="leading-snug text-[11px] font-sans text-amber-100/90">{synthesisText}</p>
+                                                 <p className="text-[9px] text-[#66FCF1]/80 italic mt-1 bg-black/30 p-1.5 border border-amber-950/40 font-mono">
+                                                    ⚖️ FACTUAL COHERENCE: {item?.name} is linked to {rName}.
+                                                 </p>
+                                              </>
+                                           );
+                                        })()}
+                                     </div>
+                                  </div>
+                               )}
+
                                <button 
                                    disabled={!selectedContradictionId || !selectedLawCardId || (!!trialStep.reliabilityReason && !selectedReliability)}
                                    onClick={handleExecuteContradiction}

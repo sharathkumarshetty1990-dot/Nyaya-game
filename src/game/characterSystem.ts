@@ -41,10 +41,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"They sent a warrant. Because it had my 'Regards, Principal Sharma' signature habit, I was frozen. I believed they were real."`;
+        return `"They sent an arrest warrant. I was terrified. They had my full name and details. I complied."`;
       }
       if (pressure > 50) {
-        return `"They spoke of लखनऊ cyber barracks. They knew my details. I believed them."`;
+        return `"They video-called me. They ordered me to transfer my pension immediately. I believed them."`;
       }
       return originalText;
     }
@@ -57,10 +57,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"Sovereign cyber-warrant active. Secure assets under escrow ID 4402 immediately or suffer contempt of court detention."`;
+        return `"Case linked to money laundering. Transfer funds now. Compliance is mandatory. Do not disconnect the call."`;
       }
       if (pressure > 50) {
-        return `"Under Lucknow cyber barracks jurisdiction. Transfer safekeeping funds to resolve state inquiry."`;
+        return `"CBI national security inquiry. Move your pension immediately. Your account will be frozen in 10 minutes."`;
       }
       return originalText;
     }
