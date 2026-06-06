@@ -148,4 +148,5 @@ export interface GameState {
   pressureMeter: number; // 0-100, affects courtroom tension
   currentStationOfficer?: string;
   isGameOver: boolean;
+  reliabilityInterpretations?: Record<string, 'deception' | 'memory_error' | 'pressure' | 'procedural_confusion'>;
 }

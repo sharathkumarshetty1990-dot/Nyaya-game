@@ -24,6 +24,7 @@ export default function App() {
     npcTrust: {},
     pressureMeter: 0,
     isGameOver: false,
+    reliabilityInterpretations: {},
   });
 
   // Simple router
@@ -41,6 +42,7 @@ export default function App() {
       legalScore: 0,
       justiceScore: 0,
       pressureMeter: 0,
+      reliabilityInterpretations: {},
     }));
     setIsGameStarted(true);
   };

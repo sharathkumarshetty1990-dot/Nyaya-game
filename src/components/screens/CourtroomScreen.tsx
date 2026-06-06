@@ -167,7 +167,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       audioService.playBuzzer();
       setContradictionResult({
         status: 'failure',
-        message: `MISTAKEN DEDUCTION! You stand and present the ${selectedItem.name} to challenge the witness's statement. The Defense Counsel scoffs: "Counsel is shooting in the dark. How does this exhibit prove a logical contradiction?" Justice G. Singh shakes his head in deep irritation, warning you: "Counsel, do not waste this bench's time with unrelated dockets. Focus on the core of the testimony!"`
+        message: `MISTAKEN DEDUCTION! You stand and present the ${selectedItem.name} to challenge the witness's statement. The Defense Counsel scoffs: "Counsel is shooting in the dark. How does this exhibit prove a logical contradiction?" Justice G. Singh shakes his head in deep irritation: "Counsel, do not waste this bench's time with unrelated dockets. Focus on the core of the testimony!"`
       });
       setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
       setPressureAnim(true);
@@ -175,26 +175,13 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       return;
     }
 
-    // 2. Check if the player evaluated the reliability cause (if expected)
-    if (expectedReliability && selectedReliability !== expectedReliability) {
-      audioService.playBuzzer();
-      setContradictionResult({
-        status: 'weak',
-        message: `EXHIBIT CORRECT, BUT LEGAL DIAGNOSIS WRONG! You successfully present the correct evidence (${selectedItem.name}), but your evaluation of why the testimony is unreliable is incorrect. You argued that the root cause was ${selectedReliability?.replace('_', ' ').toUpperCase() || 'none selected'}. The Defense Counsel stands up: "While the document itself poses historical questions, Counsel's legal reasoning for why the witness's testimony is compromised is wholly speculative and incorrect!" Justice Singh agrees: "Counsel, presenting the right file is only half your responsibility. You must display a correct legal diagnosis of the testimony unreliability mechanism. Re-evaluate your forensic model immediately!"`
-      });
-      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 10) }));
-      setPressureAnim(true);
-      setTimeout(() => setPressureAnim(false), 500);
-      return;
-    }
-
-    // 3. Check if the evidence is admissible (BSA sec 63 verification compliance)
+    // 2. Check if the evidence is admissible (BSA sec 63 verification compliance)
     const isAdmissible = GameEngine.isEvidenceAdmissible(selectedItem);
     if (!isAdmissible) {
       audioService.playBuzzer();
       setContradictionResult({
         status: 'inadmissible',
-        message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the correct item and accurately diagnose the unreliability cause as ${expectedReliability?.replace('_', ' ').toUpperCase()}. However, because you did NOT authenticate and certify this digital exhibit in the forensic Verification Suite, the Defense Counsel leaps up: "Objection! Under Bharatiya Sakshya Adhiniyam Section 63, electronic logs are legally inadmissible without a fully signed BSA digital hash certificate!" Justice G. Singh nods with professional regret: "Sustained. Excellent legal deduction and diagnosis, Counsel, but I cannot legally admit uncertified digital material. You must verify your files before you can wield them as dockets in my court!"`
+        message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the correct item and diagnose the unreliability cause as ${selectedReliability?.replace('_', ' ').toUpperCase() || 'none'}. However, because you did NOT certify this digital exhibit in the Verification Suite, the Defense Counsel leaps up: "Objection! Under Bharatiya Sakshya Adhiniyam Section 63, electronic logs are legally inadmissible without a fully signed BSA digital hash certificate!" Justice G. Singh nods: "Sustained. Excellent legal deduction, but I cannot legally admit uncertified digital material. You must verify your files first!"`
       });
       setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
       setPressureAnim(true);
@@ -202,25 +189,108 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       return;
     }
 
-    // 4. Double success! Give specific narrative feedback based on the unreliability reason:
+    // Lookup table for our dynamic narrative reactions based on player's reliability diagnosis
+    // This allows active branching and has direct scoring consequences
+    const RELIABILITY_LOOKUP: Record<string, Record<string, { status: 'strong' | 'partial' | 'weak'; message: string }>> = {
+      'virendra-pressure-check': {
+        pressure: {
+          status: 'strong',
+          message: `STRONG ADJUDICATION! You prove that the victim signed the money transfer under active (+44) video intimidation and extortionate threat of arrest. Justice G. Singh thunders: "Indeed! Under BNS 308 (Coercion), systemic duress negates voluntary consent. The signature is a nullity! Perfectly diagnosed, Counsel."`
+        },
+        deception: {
+          status: 'partial',
+          message: `PARTIAL SUCCESS. You argue the fake +44 mask constitutes BNS 318 deceptive impersonation. G. Singh nods: "While digital impersonation occurred, the signature's actual invalidity stems from direct coercion, not mere fraud. A slightly misfocused but acceptable diagnosis."`
+        },
+        memory_error: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You claim Virendra suffered from memory inaccuracies. Virendra is offended: "I remember the terror perfectly!" G. Singh: "Suggesting memory failure under active sequestration is naive. Duress, not memory, is the core constraint here. Proceeding solely on the evidence."`
+        },
+        procedural_confusion: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You argue bank layout or procedural confusion rules applied. G. Singh: "Counsel, this is a live extortion, not a technical contract error. The victim signed because his family was threatened. Duress is the core mechanism."`
+        }
+      },
+      'mishra-memory-check': {
+        memory_error: {
+          status: 'strong',
+          message: `STRONG ADJUDICATION! You project the low-res pixelated overlays of the scammers' fake uniform. G. Singh: "Outstanding. Under the stress of an active raid, SI Mishra reconstructed a physical 'golden crest' from expectation. Human memory is reconstructive; this is a classic cognitive memory error."`
+        },
+        deception: {
+          status: 'partial',
+          message: `PARTIAL SUCCESS. You accuse SI Mishra of collusion or intentional deceit. Mishra is outraged. G. Singh: "Order! There is zero proof of collusion. The digital artifacts prove the stamp was a projection, meaning Mishra was simply mistaken, not lying."`
+        },
+        pressure: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You claim Mishra was pressured into testimony. G. Singh: "Extremely speculative. A police raiding team faces no coercion here. The visual artifacts simply show Mishra's recollection was scientifically wrong. Proceeding with caution."`
+        },
+        procedural_confusion: {
+          status: 'partial',
+          message: `PARTIAL SUCCESS. You claim search and seizure protocol under BNSS was confused. G. Singh: "While local raid logs are sloppy, the issue is his mistaken visual assertion of a physical stamp. It is a recollective failure, not a protocol error."`
+        }
+      },
+      'perjury-check': {
+        deception: {
+          status: 'strong',
+          message: `STRONG ADJUDICATION! Your certified news copy matches the CJI's live bench in Delhi, exposing 'Amit Sen' as a phantom. G. Singh: "Pure perjury and deliberate deception under BSA Sec 63. This is not a mistake; it is a calculated impersonation and fraud to execute a fake arrest!"`
+        },
+        memory_error: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You argue the impersonator simply made a scheduling error. G. Singh sighs: "A scammer spoofing warrants does not suffer from a simple diary error, Counsel. They are actively deceiving. This is a highly naive diagnosis."`
+        },
+        pressure: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You claim the fake Inspector was forced by others. G. Singh: "Highly speculative. The perpetrator is the source of the duress, not its target. The log serves to execute the cheat."`
+        },
+        procedural_confusion: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You argue the poser was confused on legal meeting rules. G. Singh: "Meeting a Delhi-bound Chief Justice in Lucknow is not legal confusion, Counsel. It is a fabricated alibi. Focus on the core fraud."`
+        }
+      },
+      'dixit-procedural-check': {
+        procedural_confusion: {
+          status: 'strong',
+          message: `STRONG ADJUDICATION! You present the Hazratganj Zero FIR. Under BNSS Sec 173, cyber crimes must be logged instantly regardless of borders. G. Singh: "Indeed. Dixit-ji was locked in outdated municipal geography habits. A textbook case of procedural confusion!"`
+        },
+        deception: {
+          status: 'partial',
+          message: `PARTIAL SUCCESS. You accuse Dixit of deliberate bad faith or collusion. Dixit objects. G. Singh: "We see no conspiracy, only a station officer following obsolete jurisdictional manuals. Your receipt is valid, but your accusation is uncalled for."`
+        },
+        memory_error: {
+          status: 'partial',
+          message: `PARTIAL SUCCESS. You argue Dixit forgot his instructions. Dixit: "I remember our codes!" G. Singh: "Indeed. He did not forget; he failed to apply the new BNSS Zero-FIR cross-territory mandates. That represents confusion of legal codes."`
+        },
+        pressure: {
+          status: 'weak',
+          message: `WEAK SUCCESS. You claim Dixit was blackmailed. Dixit: "Unfounded!" G. Singh: "The delay stems from bureaucratic territorial inertia, not criminal extortion. This diagnostic misses the administrative focus."`
+        }
+      }
+    };
+
     audioService.playSuccess();
-    let message = '';
     
-    if (expectedReliability === 'pressure') {
-      message = `STRONG CONTRADICTION ACCEPTED! You stand up and present the WhatsApp Call Screenshot showing international +44 calling masks. You argue that the transfer agreement was signed by the victim under extreme digital arrest pressure and live video coercion, rendering his voluntary signature legally null and void under BNS Section 308! Justice Singh slams his gavel: "A signature obtained under live cyber sequestration is a product of terror. The victim's compliance was completely due to direct PRESSURE, not voluntary consent. Impeachment established!"`;
-    } else if (expectedReliability === 'memory_error') {
-      message = `STRONG CONTRADICTION ACCEPTED! You project the CBI uniform logo from the scammers' feed showing high-compression pixel crops and block distortions. You prove that there was never any physical golden bronze logo stamp, demonstrating that Sub-Inspector Mishra's memory of a pristine metallic crest was an honest mental reconstruction and memory error. Justice Singh agrees: "Human memory under direct pressure is reconstructive. SI Mishra's memory is falsified by the digital artifact. It is a clear MEMORY ERROR. Impeachment established!"`;
-    } else if (expectedReliability === 'deception') {
-      message = `STRONG CONTRADICTION ACCEPTED! You project the physical Lucknow Times print clipping showing the Chief Justice on live hearings in Delhi. You prove that the scammers' alibi of a secret Lucknow barracks directive is a complete, deliberate lie. Justice Singh's expression turns thunderous: "Amit Sen's statement is neither pressure nor a memory mistake. This is calculated, perjury and DECEPTION to execute a digital arrest. Impeachment established!"`;
-    } else if (expectedReliability === 'procedural_confusion') {
-      message = `STRONG CONTRADICTION ACCEPTED! You present the Hazratganj Zero FIR Complaint Receipt. You explain that under BNSS Section 173, police are mandated to record cyber complaints immediately regardless of territorial lines, proving Dixit's territorial refusal was sheer protocol misunderstanding. Justice Singh rules: "Our new codes mandate immediate report recording to lock packet logs. Dixit was bound by old geographic conventions—a case of PROCEDURAL CONFUSION. Impeachment established!"`;
-    } else {
-      message = `STRONG CONTRADICTION ACCEPTED! You present the ${selectedItem.name} and successfully impeach the witness's statement! G. Singh strikes his gavel: "Clear contradiction established. Counsel has cleanly dismantled this point."`;
-    }
+    // Select outcome
+    const targetStepId = trialStep.id;
+    const selectedReliabilityKey = selectedReliability || 'deception';
+    const resolvedOutcome = RELIABILITY_LOOKUP[targetStepId]?.[selectedReliabilityKey] || {
+      status: 'strong',
+      message: `STRONG CONTRADICTION ACCEPTED! You present the ${selectedItem.name} and successfully impeach the witness's statement. G. Singh strikes his gavel: "Clear contradiction established."`
+    };
+
+    // Save choice in game state
+    setGameState(prev => {
+      const updatedInterpretations = {
+        ...(prev.reliabilityInterpretations || {}),
+        [targetStepId]: selectedReliabilityKey as any
+      };
+      return {
+        ...prev,
+        reliabilityInterpretations: updatedInterpretations
+      };
+    });
 
     setContradictionResult({
-      status: 'strong',
-      message
+      status: resolvedOutcome.status,
+      message: resolvedOutcome.message
     });
   };
 
@@ -240,9 +310,19 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       setStep(step + 1);
       setGameState(prev => ({
         ...prev,
-        justiceScore: Math.min(100, prev.justiceScore + 10),
-        // Let the partial advance but keep a slight pressure warning
+        justiceScore: Math.min(100, prev.justiceScore + 12),
+        // Let the partial advance but keep a slight pressure setback
         pressureMeter: Math.min(100, prev.pressureMeter + 5)
+      }));
+    } else if (contradictionResult.status === 'weak') {
+      audioService.playSuccess();
+      setShowContradiction(false);
+      setStep(step + 1);
+      setGameState(prev => ({
+        ...prev,
+        justiceScore: Math.min(100, prev.justiceScore + 5),
+        // Let them proceed but increase pressure on poor forensic theory
+        pressureMeter: Math.min(100, prev.pressureMeter + 12)
       }));
     } else {
       audioService.playGavel();
