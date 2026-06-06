@@ -40,6 +40,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   const [showContradiction, setShowContradiction] = useState(false);
   const [selectedContradictionId, setSelectedContradictionId] = useState<string | null>(null);
   const [selectedReliability, setSelectedReliability] = useState<'deception' | 'memory_error' | 'pressure' | 'procedural_confusion' | null>(null);
+  const [selectedJustificationId, setSelectedJustificationId] = useState<string | null>(null);
   const [selectedLawCardId, setSelectedLawCardId] = useState<string | null>(null);
   const [contradictionResult, setContradictionResult] = useState<{
     status: 'success' | 'failure' | 'inadmissible' | 'strong' | 'partial' | 'weak' | null;
@@ -94,6 +95,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
           setShowContradiction(true);
           setSelectedContradictionId(null);
           setSelectedReliability(null);
+          setSelectedJustificationId(null);
           setSelectedLawCardId(null);
           setContradictionResult({ status: null, message: '' });
         }, 1100);
@@ -215,44 +217,58 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     // Determine expected Law Card for this step
     const targetStepId = trialStep.id;
     let expectedLawId = '';
-    if (targetStepId === 'virendra-pressure-check') expectedLawId = 'bns-308';
-    else if (targetStepId === 'mishra-memory-check') expectedLawId = 'bsa-63';
-    else if (targetStepId === 'perjury-check') expectedLawId = 'bns-318';
-    else if (targetStepId === 'dixit-procedural-check') expectedLawId = 'bnss-173';
+    let expectedJustificationId = '';
+    if (targetStepId === 'virendra-pressure-check') {
+      expectedLawId = 'bns-308';
+      expectedJustificationId = 'cbi-logo';
+    } else if (targetStepId === 'mishra-memory-check') {
+      expectedLawId = 'bsa-63';
+      expectedJustificationId = 'wa-ss';
+    } else if (targetStepId === 'perjury-check') {
+      expectedLawId = 'bns-318';
+      expectedJustificationId = 'wa-ss';
+    } else if (targetStepId === 'dixit-procedural-check') {
+      expectedLawId = 'bnss-173';
+      expectedJustificationId = 'wa-ss';
+    }
 
     const selectedLaw = LAW_CARDS.find(l => l.id === selectedLawCardId);
     const selectedReliabilityKey = selectedReliability || 'deception';
 
     const isLawCorrect = selectedLawCardId === expectedLawId;
     const isReliabilityCorrect = selectedReliabilityKey === expectedReliability;
+    const isJustificationCorrect = selectedJustificationId === expectedJustificationId;
 
     audioService.playSuccess();
 
     let status: 'strong' | 'partial' | 'weak' = 'weak';
     let message = '';
 
-    if (isLawCorrect && isReliabilityCorrect) {
+    if (isLawCorrect && isReliabilityCorrect && isJustificationCorrect) {
       status = 'strong';
       if (targetStepId === 'virendra-pressure-check') {
-        message = `ADMISSIBLE. Under BNS Section 308, direct coercion and video-called threats completely negate voluntary consent. Presenting the certified WhatsApp screenshot proves coercion. The declaration is ruled void and excluded.`;
+        message = `ADMISSIBLE. Under BNS Section 308, direct coercion and video-called threats completely negate voluntary consent. Presenting the certified WhatsApp screenshot, supported by the counterfeit logo proving cyber-spoofing, forms an ironclad evidentiary chain. Coerced declaration ruled void!`;
       } else if (targetStepId === 'mishra-memory-check') {
-        message = `SUSTAINED. Under BSA Section 63, electronic analysis of pixel structures proves the logo is a digital overlay. Officer Mishra's recollection is a cognitive memory error. No physical stamp existed.`;
+        message = `SUSTAINED. Under BSA Section 63, electronic structure analysis proves the CBI logo was a synthetic overlay. Citing the electronic WhatsApp environment as corroboration proves the officer suffered a classical cognitive source-monitoring memory error. No physical stamp existed.`;
       } else if (targetStepId === 'perjury-check') {
-        message = `DECEPTION CONFIRMED. Under BNS 318, the alibi is perjury. Official newspaper reports place the CJI in Delhi on April 14, making the alleged Lucknow barracks meeting physically impossible.`;
+        message = `DECEPTION CONFIRMED. Under BNS 318, the alibi is perjury. Official newspaper reports place the CJI in Delhi, while the spoofed call logs assert Lucknow presence. This dual-link mapping proves malicious fraud.`;
       } else if (targetStepId === 'dixit-procedural-check') {
-        message = `PROCEDURAL BYPASS ADOPTED. Under BNSS Section 173, Zero FIR registration is mandatory for regional complaints of digital crime. Station territorial objections are ruled void.`;
+        message = `PROCEDURAL BYPASS ADOPTED. Under BNSS Section 173, Zero FIR registration is mandatory for digital crimes. Linking the WhatsApp transaction proves the crime occurred over the internet—overriding Hazratganj's spatial limits.`;
       } else {
-        message = `FLAWLESS ARGUMENT. Exhibit ${selectedItem.name} admitted under ${selectedLaw?.section} with correct reliability diagnosis of ${selectedReliabilityKey.toUpperCase()}. The court accepts the filing.`;
+        message = `FLAWLESS LEGAL REASONING. Exhibit ${selectedItem.name} admitted under ${selectedLaw?.section} with correct reliability diagnosis of ${selectedReliabilityKey.toUpperCase()} and coherent corroborating grounds.`;
       }
+    } else if (isLawCorrect && isReliabilityCorrect && !isJustificationCorrect) {
+      status = 'partial';
+      message = `PARTIAL REASONING. Your diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} and statutory citation of ${selectedLaw?.section} are textually correct. However, you selected an incorrect corroborating justification exhibit. The defense counselor argues your causal link remains legally ungrounded!`;
     } else if (isReliabilityCorrect) {
       status = 'partial';
-      message = `PARTIAL COMPLIANCE. Reliability diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} is factually correct. However, the cited statute (${selectedLaw ? selectedLaw.section : 'none'}) is legally incorrect for this challenge. Brief sustained on facts but marked with a statutory penalty.`;
+      message = `PARTIAL COMPLIANCE. Reliability diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} is factually correct. However, the cited statute (${selectedLaw ? selectedLaw.section : 'none'}) is legally incorrect. Brief sustained on facts but marked with a statutory penalty.`;
     } else if (isLawCorrect) {
       status = 'partial';
-      message = `PARTIAL COMPLIANCE. Statutory citation of ${selectedLaw?.section} is correct, admitting the exhibit. However, the diagnosed reliability cause (${selectedReliabilityKey.replace('_', ' ').toUpperCase()}) is incorrect. Fact admitted but theoretical standing penalized.`;
+      message = `PARTIAL COMPLIANCE. Statutory citation of ${selectedLaw?.section} is correct, admitting the exhibit. However, the diagnosed reliability cause (${selectedReliabilityKey.replace('_', ' ').toUpperCase()}) is theoretically incorrect. Fact admitted but legal standing penalized.`;
     } else {
       status = 'weak';
-      message = `WEAK ADJUDICATION. Exhibit matched, but both statutory selection and reliability diagnosis are wrong. Re-evaluate.`;
+      message = `WEAK ADJUDICATION. Primary exhibit matched, but statutory selection, reliability diagnosis, or justifying corroboration are incorrect. Re-evaluate your legal chain.`;
     }
 
     // Save choice in game state
@@ -283,6 +299,11 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
         justiceScore: Math.min(100, prev.justiceScore + 25),
         pressureMeter: Math.max(0, prev.pressureMeter - 20)
       }));
+      setSelectedContradictionId(null);
+      setSelectedReliability(null);
+      setSelectedJustificationId(null);
+      setSelectedLawCardId(null);
+      setContradictionResult({ status: null, message: '' });
     } else if (contradictionResult.status === 'partial') {
       audioService.playSuccess();
       setShowContradiction(false);
@@ -292,6 +313,11 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
         justiceScore: Math.min(100, prev.justiceScore + 12),
         pressureMeter: Math.min(100, prev.pressureMeter + 5)
       }));
+      setSelectedContradictionId(null);
+      setSelectedReliability(null);
+      setSelectedJustificationId(null);
+      setSelectedLawCardId(null);
+      setContradictionResult({ status: null, message: '' });
     } else if (contradictionResult.status === 'weak') {
       audioService.playSuccess();
       setShowContradiction(false);
@@ -301,11 +327,17 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
         justiceScore: Math.min(100, prev.justiceScore + 5),
         pressureMeter: Math.min(100, prev.pressureMeter + 12)
       }));
+      setSelectedContradictionId(null);
+      setSelectedReliability(null);
+      setSelectedJustificationId(null);
+      setSelectedLawCardId(null);
+      setContradictionResult({ status: null, message: '' });
     } else {
       audioService.playGavel();
       setContradictionResult({ status: null, message: '' });
       setSelectedContradictionId(null);
       setSelectedReliability(null);
+      setSelectedJustificationId(null);
       setSelectedLawCardId(null);
     }
   };
@@ -482,16 +514,18 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                     selectedReliability={selectedReliability}
                                     onSelect={setSelectedReliability}
                                     selectedContradictionId={selectedContradictionId}
+                                    selectedJustificationId={selectedJustificationId}
+                                    onSelectJustification={setSelectedJustificationId}
                                     inventory={gameState.inventory}
                                     reliabilityReasonNeeded={!!trialStep.reliabilityReason}
                                   />
                                </div>
 
                                <button 
-                                   disabled={!selectedContradictionId || !selectedLawCardId || (!!trialStep.reliabilityReason && !selectedReliability)}
+                                   disabled={!selectedContradictionId || !selectedLawCardId || (!!trialStep.reliabilityReason && (!selectedReliability || !selectedJustificationId))}
                                    onClick={handleExecuteContradiction}
                                    className={`w-full py-4 border-2 uppercase font-bold text-[10px] tracking-widest shadow-md transition-all cursor-pointer ${
-                                      selectedContradictionId && selectedLawCardId && (!trialStep.reliabilityReason || selectedReliability)
+                                      selectedContradictionId && selectedLawCardId && (!trialStep.reliabilityReason || (selectedReliability && selectedJustificationId))
                                         ? 'bg-accent text-white border-accent hover:bg-black hover:text-white'
                                         : 'bg-[#180E0A] text-amber-100/20 border-amber-950/20 cursor-not-allowed'
                                    }`}

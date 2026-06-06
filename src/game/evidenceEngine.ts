@@ -7,18 +7,27 @@ import { Evidence, AuthenticityStatus, AdmissibilityStatus, GameState } from '..
 export const verifyEvidence = (evidence: Evidence, state: GameState): Evidence => {
   const pressurePenalty = state.pressureMeter > 50 ? 15 : 0;
   
-  // Logical depth: if supporting evidence is already verified, credibility increases
+  // Logical depth: if supporting evidence is already verified, supporting evidence verified is true
   const supportVerified = evidence.supports?.some(id => 
     state.inventory.find(e => e.id === id)?.authenticity === AuthenticityStatus.VERIFIED
   );
 
   const newCredibility = Math.min(100, (evidence.credibility || 30) + (supportVerified ? 40 : 25) - pressurePenalty);
-  const newAdmissibilityStrength = evidence.admissibilityStrength || 10;
+  
+  // Construct qualitative reasoning causes
+  const causes = [
+    "✓ Metadata consistent",
+    "✓ Independent corroboration found"
+  ];
+  if (supportVerified) {
+    causes.push("✓ Supporting evidence verified");
+  }
 
   return { 
     ...evidence, 
     authenticity: AuthenticityStatus.VERIFIED,
-    credibility: newCredibility
+    credibility: newCredibility,
+    verificationCauses: causes
   };
 };
 
@@ -34,11 +43,21 @@ export const certifyEvidence = (evidence: Evidence): Evidence => {
   const newCredibility = evidence.credibility || 50;
   const newAdmissibilityStrength = Math.min(100, (evidence.admissibilityStrength || 10) + 75);
 
+  const currentCauses = evidence.verificationCauses || [
+    "✓ Metadata consistent",
+    "✓ Independent corroboration found"
+  ];
+  const updatedCauses = [...currentCauses];
+  if (!updatedCauses.includes("✓ Custody chain verified under BSA Sec. 63")) {
+    updatedCauses.push("✓ Custody chain verified under BSA Sec. 63");
+  }
+
   return { 
     ...evidence, 
     admissibility: AdmissibilityStatus.ADMITTED, 
     hasBSACertificate: true,
-    admissibilityStrength: newAdmissibilityStrength
+    admissibilityStrength: newAdmissibilityStrength,
+    verificationCauses: updatedCauses
   };
 };
 

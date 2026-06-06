@@ -75,29 +75,40 @@ export default function EvidencePanel({
               </div>
               
               {/* Reason-Focused Verification Pillars */}
-              <div className="space-y-1 bg-black/30 p-2 border border-amber-950/20 text-[9px]">
-                <div className="flex items-center gap-1.5">
-                  <span className={isVerified ? 'text-[#6FCF97]' : 'text-[#C5C6C7]/30'}>
-                    {isVerified ? '✓' : '✗'}
-                  </span>
-                  <span className={isVerified ? 'text-[#6FCF97]/80' : 'text-[#C5C6C7]/30 font-mono text-[8px]'}>
-                    Metadata Aligned
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className={isVerified ? 'text-[#6FCF97]' : 'text-[#C5C6C7]/30'}>
-                    {isVerified ? '✓' : '✗'}
-                  </span>
-                  <span className={isVerified ? 'text-[#6FCF97]/80' : 'text-[#C5C6C7]/30 font-mono text-[8px]'}>
-                    Witness Corroborated
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
+              <div className="space-y-1 bg-black/30 p-2 border border-amber-950/20 text-[9px] text-left">
+                {isVerified ? (
+                  (item.verificationCauses || ["✓ Metadata consistent", "✓ Independent corroboration found"]).map((cause, causeIdx) => (
+                    <div key={causeIdx} className="flex items-center gap-1.5">
+                      <span className="text-[#6FCF97]">✓</span>
+                      <span className="text-[#6FCF97]/80 font-mono text-[8.5px]">
+                        {cause.replace("✓ ", "")}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[#C5C6C7]/30">✗</span>
+                      <span className="text-[#C5C6C7]/30 font-mono text-[8px]">
+                        Metadata Unverified
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[#C5C6C7]/30">✗</span>
+                      <span className="text-[#C5C6C7]/30 font-mono text-[8px]">
+                        Corroborating Evidence Missing
+                      </span>
+                    </div>
+                  </>
+                )}
+                
+                {/* Certify seal cause */}
+                <div className="flex items-center gap-1.5 border-t border-amber-950/20 pt-1 mt-1">
                   <span className={isCertified ? 'text-[#66FCF1]' : 'text-[#C5C6C7]/30'}>
                     {isCertified ? '✓' : '✗'}
                   </span>
                   <span className={isCertified ? 'text-[#66FCF1]/80' : 'text-[#C5C6C7]/30 font-mono text-[8px]'}>
-                    Custody Chain Sealed
+                    Custody Chain Sealed (BSA Sec 63)
                   </span>
                 </div>
               </div>

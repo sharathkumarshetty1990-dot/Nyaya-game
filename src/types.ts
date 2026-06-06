@@ -67,6 +67,7 @@ export interface Evidence {
   authenticityRisk?: string;
   bsaSection?: string;
   contentUrl?: string;
+  verificationCauses?: string[];
   
   // Relational Depth
   linkedEvidenceIds: string[];

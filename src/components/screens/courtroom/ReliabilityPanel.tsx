@@ -5,6 +5,8 @@ interface ReliabilityPanelProps {
   selectedReliability: 'deception' | 'memory_error' | 'pressure' | 'procedural_confusion' | null;
   onSelect: (r: 'deception' | 'memory_error' | 'pressure' | 'procedural_confusion') => void;
   selectedContradictionId: string | null;
+  selectedJustificationId: string | null;
+  onSelectJustification: (id: string) => void;
   inventory: Evidence[];
   reliabilityReasonNeeded: boolean;
 }
@@ -13,6 +15,8 @@ export default function ReliabilityPanel({
   selectedReliability,
   onSelect,
   selectedContradictionId,
+  selectedJustificationId,
+  onSelectJustification,
   inventory,
   reliabilityReasonNeeded
 }: ReliabilityPanelProps) {
@@ -55,31 +59,109 @@ export default function ReliabilityPanel({
       </div>
 
       {selectedContradictionId && selectedReliability && (
+        <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30 animate-fadeIn">
+          <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
+            3.1 Specify Corroborating Evidence (Justification)
+          </div>
+          <p className="text-[7.5px] text-amber-100/40 italic leading-snug">
+            Choose an independent corroborating exhibit to complete the legal reasoning chain.
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {inventory
+              .filter(item => item.id !== selectedContradictionId)
+              .map(item => {
+                const isSelected = selectedJustificationId === item.id;
+                return (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => onSelectJustification(item.id)}
+                    className={`p-1.5 text-left border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-accent/15 border-accent text-amber-100'
+                        : 'bg-black/30 border-amber-950/40 text-[#C5C6C7] hover:border-amber-900/40'
+                    }`}
+                  >
+                    <span className="font-bold text-[8px] tracking-tight block truncate text-amber-100">
+                      {item.name}
+                    </span>
+                    <span className="text-[6.5px] opacity-40 font-mono block uppercase mt-0.5">
+                      REF_{item.id.replace('-', '_').toUpperCase()}
+                    </span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
+      {selectedContradictionId && selectedReliability && (
         <div className="bg-[#26150F] border border-amber-950/60 p-3.5 space-y-1 text-left font-sans text-xs animate-fadeIn">
           <span className="mono text-[8.5px] text-amber-500 font-bold uppercase tracking-widest block">
             CONSTRUCTED ARGUMENT SYNTHESIS
           </span>
           <div className="text-amber-100 font-medium leading-relaxed font-serif">
             {(() => {
-              const item = inventory.find(e => e.id === selectedContradictionId);
+              const mainItem = inventory.find(e => e.id === selectedContradictionId);
+              const justificationItem = inventory.find(e => e.id === selectedJustificationId);
               const rName = selectedReliability.replace('_', ' ').toUpperCase();
+              
               let synthesisText = "";
+              let isExactChain = false;
+
               if (selectedContradictionId === 'wa-ss' && selectedReliability === 'pressure') {
-                synthesisText = `Exhibit ${item?.name} provides direct evidence of BNS Sec 308 (Extortion) coercion. The UTC timestamp shift proves VoIP spoofing was active during the forced declaration, demonstrating extreme psychological pressure.`;
+                if (selectedJustificationId === 'cbi-logo') {
+                  isExactChain = true;
+                  synthesisText = `The WhatsApp screenshot (${mainItem?.name}) provides primary proof of coercion (BNS Sec 308). This pressure is heavily corroborated by the counterfeit CBI logo analysis (${justificationItem?.name}), establishing that the threat actors deployed high-grade synthetic federal authority (impersonation badges) to completely hijack and override the schoolmaster's voluntary agency.`;
+                } else if (selectedJustificationId) {
+                  synthesisText = `The WhatsApp screenshot (${mainItem?.name}) shows digital threats. However, utilizing ${justificationItem?.name} as justification fails to map the psychological weapon of false federal authority that overpowered the counselor under BNS 308.`;
+                } else {
+                  synthesisText = `Select a corroborating justification exhibit to complete the legal reasoning chain for high-pressure extortion.`;
+                }
               } else if (selectedContradictionId === 'cbi-logo' && selectedReliability === 'memory_error') {
-                synthesisText = `SI Mishra recalled recovering a physical 'gold seal stamp'. However, spectral analysis of the CBI logo overlay proves the crest was entirely synthetic, demonstrating a classic cognitive memory error under high-stress pressure.`;
+                if (selectedJustificationId === 'wa-ss') {
+                  isExactChain = true;
+                  synthesisText = `Sub-Inspector Mishra's memory of recovering a physical 'gold seal stamp' with this logo is discredited by the CBI logo analysis (${mainItem?.name}). This memory error is corroborated by the virtual environment of the WhatsApp screenshot (${justificationItem?.name}), proving the entire threat cycle was executed over a digital-only channel—causing cognitive source-monitoring error during the high-stress raid.`;
+                } else if (selectedJustificationId) {
+                  synthesisText = `The CBI logo analysis (${mainItem?.name}) proves the physical crest is synthetic. However, citing ${justificationItem?.name} as justification does not establish the virtual interaction context (WhatsApp execution) that triggered the SI's memory reconstruction error.`;
+                } else {
+                  synthesisText = `Select a corroborating justification exhibit to explain the officer's visual memory error.`;
+                }
               } else if (selectedContradictionId === 'newspaper-cji' && selectedReliability === 'deception') {
-                synthesisText = `The CBI Transcript claims Amit Sen met the CJI in Lucknow on April 14th. Challenging this with the physical Daily Newspaper proves CJI was actually presiding in New Delhi, confirming deliberate alibi deception (Perjury).`;
+                if (selectedJustificationId === 'wa-ss') {
+                  isExactChain = true;
+                  synthesisText = `The Daily Newspaper report (${mainItem?.name}) proves Chief Justice G. Singh was presiding in Supreme Court Room 1 in New Delhi. This directly falsifies the CBI poser threat logs (${justificationItem?.name}) asserting Lucknow barracks custody warrant meetings, establishing deliberate, coordinated perjury and deception (BNS Sec 318).`;
+                } else if (selectedJustificationId) {
+                  synthesisText = `The Newspaper report (${mainItem?.name}) places the CJI in Delhi. However, to construct a complete perjury argument, this must be explicitly cross-referenced with the digital call logs and threat transcripts (${justificationItem?.name}) that carried the false alibi statements.`;
+                } else {
+                  synthesisText = `Select the primary call transcript or threat context as a corroborating exhibit to expose perjury.`;
+                }
               } else if (selectedContradictionId === 'zero-fir-receipt' && selectedReliability === 'procedural_confusion') {
-                synthesisText = `Officer Dixit refused complaint registration due to 'out-of-district' limits. The Zero FIR receipt and BNSS Sec 173 mandate instant digital complaint registration, demonstrating territorial procedural confusion.`;
+                if (selectedJustificationId === 'wa-ss') {
+                  isExactChain = true;
+                  synthesisText = `The Zero FIR receipt (${mainItem?.name}) proves legal compliance under BNSS Section 173. Citing the WhatsApp screenshot (${justificationItem?.name}) as corroborative support proves that the crime was purely electronic, which by supreme statute overrides all regional police jurisdiction codes and physical territory locks.`;
+                } else if (selectedJustificationId) {
+                  synthesisText = `The Zero FIR receipt (${mainItem?.name}) validates swift procedure. However, to rule Hazratganj's territorial boundary refusal void, you must corroborate the procedural confusion with direct proof of the electronic nature (${justificationItem?.name}) of the crime.`;
+                } else {
+                  synthesisText = `Select a corroborating justification exhibit to override physical territorial boundaries.`;
+                }
               } else {
-                synthesisText = `Supporting ${rName} with ${item?.name} to demonstrate a discrepancy in the testimony.`;
+                synthesisText = `Diagnosing ${rName} on ${mainItem?.name}. ${justificationItem ? `Corroborating factor linked via ${justificationItem.name}.` : 'Choose a corroborating exhibit to complete your statement.'}`;
               }
+
               return (
                 <>
-                  <p className="leading-snug text-[11px] font-sans text-amber-100/90">{synthesisText}</p>
-                  <p className="text-[9px] text-[#66FCF1]/80 italic mt-1 bg-black/30 p-1.5 border border-amber-950/40 font-mono">
-                    ⚖️ FACTUAL COHERENCE: {item?.name || 'Exhibit'} is linked to {rName}.
+                  <p className="leading-snug text-[10.5px] font-sans text-amber-100/90">{synthesisText}</p>
+                  <p className={`text-[8.5px] mt-2 p-1.5 border font-mono flex items-center gap-1.5 ${
+                    isExactChain 
+                      ? 'bg-emerald-950/20 text-[#6FCF97] border-[#6FCF97]/20' 
+                      : 'bg-[#1A0D08] text-amber-500 border-amber-950/40'
+                  }`}>
+                    {isExactChain ? (
+                      <>⚖️ LEGAL REASONING COHERENT (Double-Link chain formed!)</>
+                    ) : (
+                      <>⚖️ LOGICAL JUSTIFICATION: Pending complete legal reasoning chain...</>
+                    )}
                   </p>
                 </>
               );

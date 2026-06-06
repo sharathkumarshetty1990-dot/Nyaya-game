@@ -25,10 +25,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"Counsel. Evidence. My bench demands statutory proof, not uncertified pixels. Status?"`;
+        return `[shuffling legal briefs sternly] ${originalText} [gavel bangs twice] This bench demands strict statutory proof, Counselor. No procedural deviations will be tolerated under Section 63!`;
       }
       if (pressure > 50) {
-        return `"Admissibility? The BSA is law, Counsel. Stick to certified exhibits."`;
+        return `[tapping pen impatiently] Counselor, let us maintain protocol. ${originalText} We must stick to legally admissible evidence.`;
       }
       return originalText;
     }
@@ -41,10 +41,16 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"They sent an arrest warrant. I was terrified. They had my full name and details. I complied."`;
+        const distorted = originalText
+          .replace(/I /g, "I... I ")
+          .replace(/my /g, "m-my ")
+          .replace(/me /g, "m-me ")
+          .replace(/\. /g, ". ... [wipes hands shakingly] ... ");
+        return `[breathing heavily, voice cracking] ${distorted} [pauses] ... I... I was terrified... they had my full name and details... is... is my pension gone?`;
       }
       if (pressure > 50) {
-        return `"They video-called me. They ordered me to transfer my pension immediately. I believed them."`;
+        const distorted = originalText.replace(/\. /g, ". [shivers slightly] ... ");
+        return `${distorted} [wipes brow nervously] ... if my memory recalls.`;
       }
       return originalText;
     }
@@ -57,10 +63,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"Case linked to money laundering. Transfer funds now. Compliance is mandatory. Do not disconnect the call."`;
+        return `[glitched transcript feed] ${originalText} [robotic interference tone] COMPLIANCE MEASURES MANDATORY -- PROSECUTION EVIDENCE INVALIDATION DETECTED.`;
       }
       if (pressure > 50) {
-        return `"CBI national security inquiry. Move your pension immediately. Your account will be frozen in 10 minutes."`;
+        return `[audio noise lines] ${originalText} [severe static sound] TRANSCRIPT UNADMITTED: SECTION 63 CUSTODY WARNING.`;
       }
       return originalText;
     }
@@ -73,10 +79,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"Objection. Regional timestamp quirks are trivial. The prosecution is obfuscating focus."`;
+        return `[slams hand on defense table] ${originalText} This is a procedural farce! We object to these groundless digital insertions!`;
       }
       if (pressure > 50) {
-        return `"No statutory dual-signature certificate, no admissibility. The screenshot remains legally void."`;
+        return `[smirks thinly, fixing cuffs] ${originalText} Our guidelines are clear, Counsel. Where is the dual-signature hash?`;
       }
       return originalText;
     }
