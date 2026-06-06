@@ -25,10 +25,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `[shuffling legal briefs sternly] ${originalText} [gavel bangs twice] This bench demands strict statutory proof, Counselor. No procedural deviations will be tolerated under Section 63!`;
+        return `[Bench Memorandum Review] ${originalText} This court requires precise chronological and statutory consistency. Any procedural or forensic ambiguity under Section 63 must be addressed before this exhibit can be formally admitted.`;
       }
       if (pressure > 50) {
-        return `[tapping pen impatiently] Counselor, let us maintain protocol. ${originalText} We must stick to legally admissible evidence.`;
+        return `Counselor, let us preserve procedural protocol. ${originalText} We must restrict our focus strictly to certified, legally admissible entries.`;
       }
       return originalText;
     }
@@ -42,15 +42,14 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
         const distorted = originalText
-          .replace(/I /g, "I... I ")
-          .replace(/my /g, "m-my ")
-          .replace(/me /g, "m-me ")
-          .replace(/\. /g, ". ... [wipes hands shakingly] ... ");
-        return `[breathing heavily, voice cracking] ${distorted} [pauses] ... I... I was terrified... they had my full name and details... is... is my pension gone?`;
+          .replace(/immediately/g, "at some point... or perhaps later... I cannot confirm")
+          .replace(/fully/g, "partially... or maybe fully")
+          .replace(/\. /g, "... I think. ... ");
+        return `${distorted} ...the exact sequence of events is becoming difficult to isolate. There were multiple concurrent calls... was my pension targeted first, or did the federal claims happen prior?`;
       }
       if (pressure > 50) {
-        const distorted = originalText.replace(/\. /g, ". [shivers slightly] ... ");
-        return `${distorted} [wipes brow nervously] ... if my memory recalls.`;
+        const distorted = originalText.replace(/\. /g, "... if my memory serves me correctly... ");
+        return `${distorted} ...there was high cognitive load during that hour. Is there any objective digital log to confirm that part?`;
       }
       return originalText;
     }
@@ -63,10 +62,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `[glitched transcript feed] ${originalText} [robotic interference tone] COMPLIANCE MEASURES MANDATORY -- PROSECUTION EVIDENCE INVALIDATION DETECTED.`;
+        return `[LATENCY DEVIATION SIGNALET] ${originalText} [FORENSIC METADATA: Source trunk identifies as international gateway +44; subscriber profile unverified].`;
       }
       if (pressure > 50) {
-        return `[audio noise lines] ${originalText} [severe static sound] TRANSCRIPT UNADMITTED: SECTION 63 CUSTODY WARNING.`;
+        return `[TRANSMISSION ARTIFACTS] ${originalText} [FORENSIC METADATA: Local timezone offset mismatch detected].`;
       }
       return originalText;
     }
@@ -79,10 +78,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `[slams hand on defense table] ${originalText} This is a procedural farce! We object to these groundless digital insertions!`;
+        return `We object to this reading! ${originalText} The prosecution's timeline contains clear, unaccounted chronological lapses. To rely on this would be a major procedural misstep!`;
       }
       if (pressure > 50) {
-        return `[smirks thinly, fixing cuffs] ${originalText} Our guidelines are clear, Counsel. Where is the dual-signature hash?`;
+        return `A highly tenuous connection, Counsel. ${originalText} Where is the verifiable, dual-signature hash to support this timeline?`;
       }
       return originalText;
     }

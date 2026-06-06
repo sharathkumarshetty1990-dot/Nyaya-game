@@ -34,7 +34,7 @@ export default function ReliabilityPanel({
     <div className="space-y-4 pt-3 border-t border-[#5A3D2D]/30">
       <div className="space-y-2">
         <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-          3. Evaluate Testimony Reliability Cause
+          2. Evaluate Testimony Reliability Cause (Reliability Interpretation)
         </div>
         <div className="grid grid-cols-2 gap-2">
           {reliabilityOptions.map(r => {
@@ -61,7 +61,7 @@ export default function ReliabilityPanel({
       {selectedContradictionId && selectedReliability && (
         <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30 animate-fadeIn">
           <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-            3.1 Specify Corroborating Evidence (Justification)
+            2.1 Specify Corroborating Evidence (Justification)
           </div>
           <p className="text-[7.5px] text-amber-100/40 italic leading-snug">
             Choose an independent corroborating exhibit to complete the legal reasoning chain.

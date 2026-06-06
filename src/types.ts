@@ -71,6 +71,7 @@ export interface Evidence {
   
   // Factual Findings & Attributes (Empirical Facts, not pre-calculated interpretations)
   factualProperties?: string[];
+  factualThemes?: string[];
 }
 
 export interface LawCard {

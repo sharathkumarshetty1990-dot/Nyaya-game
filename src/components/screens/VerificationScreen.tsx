@@ -224,12 +224,9 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
       });
       
       const verifiedItem = GameEngine.verifyEvidence(selectedEvidence, gameState);
-      // Give a physical boost to credibility on correct interpretation
-      const credibilityBoost = selectedEvidence.id === 'newspaper-cji' ? 100 : Math.min(100, (verifiedItem.credibility || 50) + 15);
       
       updateEvidence(selectedEvidence.id, {
         ...verifiedItem,
-        credibility: credibilityBoost,
         authenticityRisk: `Verified Interpretive Dossier: ${hyp.text}`
       });
 
@@ -860,7 +857,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                        <p className="text-xs text-[#C5C6C7]/60">This verified digital asset lacks a valid dual-signature forensic hash. Certify to legally elevate admissibility stats, preventing court exclusions.</p>
                     </div>
                     <button
-                       onClick={() => updateEvidence(selectedEvidence.id, GameEngine.certifyEvidence(selectedEvidence))}
+                       onClick={() => updateEvidence(selectedEvidence.id, GameEngine.certifyEvidence(selectedEvidence, gameState))}
                        className="px-6 py-4 bg-[#6FCF97] hover:bg-green-600 text-black font-bold uppercase tracking-widest text-xs mono shrink-0"
                     >
                        ISSUE DIGITAL BSA CERTIFICATE

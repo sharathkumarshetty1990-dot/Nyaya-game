@@ -61,7 +61,8 @@ export const EVIDENCE_POOL: Evidence[] = [
       'Caller Identity Flag: Contains VoIP-spoofed country code prefix (+44 / UK)',
       'Timestamp: Recorded at 10:00 AM IST on April 14, 2026',
       'Device Origin: Standard high-density frame buffer export matches victim\'s mobile hardware'
-    ]
+    ],
+    factualThemes: ['cyber_communication_channel', 'spoofed_identity_vector', 'temporal_spatial_alignment']
   },
   {
     id: 'cbi-logo',
@@ -80,7 +81,8 @@ export const EVIDENCE_POOL: Evidence[] = [
       'Logo Geometry: Standard shape with non-uniform custom-drawn border lines',
       'Color Profile: High-compression CMYK macro block layout instead of continuous embroidery thread tone',
       'Origin Profile: Extracted directly from uncertified video stream codec blocks'
-    ]
+    ],
+    factualThemes: ['synthetic_imagery', 'spoofed_identity_vector']
   },
   {
     id: 'newspaper-cji',
@@ -97,7 +99,8 @@ export const EVIDENCE_POOL: Evidence[] = [
       'Publication Date: April 14, 2026, morning edition',
       'Physical Medium: Genuine low-acid lithographic web newsprint with CMYK rosettes',
       'Factual Lead Text: Chief Justice G. Singh arrives at Supreme Court Room 1 in New Delhi at 11:00 AM IST for administrative dockets'
-    ]
+    ],
+    factualThemes: ['physical_location_verification', 'temporal_spatial_alignment']
   },
   {
     id: 'zero-fir-receipt',
@@ -114,6 +117,7 @@ export const EVIDENCE_POOL: Evidence[] = [
       'Registration Status: Zero FIR Complaint entered in national portal with serial 822/BNSS173',
       'Transaction Nature: Purely electronic/cyber transaction targeting Lucknow resident from offsite nodes',
       'Station Coordinates: Hazratganj station signature stamp valid and catalogued'
-    ]
+    ],
+    factualThemes: ['jurisdiction_bypass', 'cyber_communication_channel']
   }
 ];

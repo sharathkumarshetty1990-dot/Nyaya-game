@@ -217,19 +217,14 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     // Determine expected Law Card for this step
     const targetStepId = trialStep.id;
     let expectedLawId = '';
-    let expectedJustificationId = '';
     if (targetStepId === 'virendra-pressure-check') {
       expectedLawId = 'bns-308';
-      expectedJustificationId = 'cbi-logo';
     } else if (targetStepId === 'mishra-memory-check') {
       expectedLawId = 'bsa-63';
-      expectedJustificationId = 'wa-ss';
     } else if (targetStepId === 'perjury-check') {
       expectedLawId = 'bns-318';
-      expectedJustificationId = 'wa-ss';
     } else if (targetStepId === 'dixit-procedural-check') {
       expectedLawId = 'bnss-173';
-      expectedJustificationId = 'wa-ss';
     }
 
     const selectedLaw = LAW_CARDS.find(l => l.id === selectedLawCardId);
@@ -237,7 +232,26 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
 
     const isLawCorrect = selectedLawCardId === expectedLawId;
     const isReliabilityCorrect = selectedReliabilityKey === expectedReliability;
-    const isJustificationCorrect = selectedJustificationId === expectedJustificationId;
+
+    // Use dynamic factual themes (facts -> inference) to determine if the justification exhibit correctly supports the main exhibit
+    const justificationItem = gameState.inventory.find(e => e.id === selectedJustificationId);
+    let isJustificationCorrect = false;
+    
+    if (selectedItem && justificationItem) {
+      if (targetStepId === 'virendra-pressure-check' || targetStepId === 'mishra-memory-check') {
+        // Coercion or memory error requires proving how the synthetic authority was delivered / interacted with
+        isJustificationCorrect = selectedItem.factualThemes?.includes('spoofed_identity_vector') === true && 
+                                 justificationItem.factualThemes?.includes('spoofed_identity_vector') === true;
+      } else if (targetStepId === 'perjury-check') {
+        // Perjury requires cross-checking official locations against temporal communication logs
+        isJustificationCorrect = selectedItem.factualThemes?.includes('temporal_spatial_alignment') === true && 
+                                 justificationItem.factualThemes?.includes('temporal_spatial_alignment') === true;
+      } else if (targetStepId === 'dixit-procedural-check') {
+        // Procedural overrule requires linking the zero-FIR receipt to the cyber communication channel evidence
+        isJustificationCorrect = selectedItem.factualThemes?.includes('cyber_communication_channel') === true && 
+                                 justificationItem.factualThemes?.includes('cyber_communication_channel') === true;
+      }
+    }
 
     audioService.playSuccess();
 
@@ -471,7 +485,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                            </div>
 
                            {contradictionResult.status === null ? (
-                             <>
+                              <>
                                {/* Selector */}
                                <div className="space-y-4">
                                   {/* Step 1: Select Forensic Exhibit Component */}
@@ -482,10 +496,21 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                     onSelect={setSelectedContradictionId}
                                   />
 
-                                  {/* Step 2: Cite Sovereign Statutory Code */}
+                                  {/* Step 2: Evaluate Testimony Reliability Component */}
+                                  <ReliabilityPanel
+                                    selectedReliability={selectedReliability}
+                                    onSelect={setSelectedReliability}
+                                    selectedContradictionId={selectedContradictionId}
+                                    selectedJustificationId={selectedJustificationId}
+                                    onSelectJustification={setSelectedJustificationId}
+                                    inventory={gameState.inventory}
+                                    reliabilityReasonNeeded={!!trialStep.reliabilityReason}
+                                  />
+
+                                  {/* Step 3: Cite Sovereign Statutory Code */}
                                   <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30">
                                      <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-                                        2. Cite Sovereign Statutory Code
+                                        3. Cite Sovereign Statutory Code (Define Contradiction)
                                      </div>
                                      <div className="grid grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
                                         {LAW_CARDS.map(law => {
@@ -497,7 +522,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                                  onClick={() => setSelectedLawCardId(law.id)}
                                                  className={`p-2 text-left border-2 transition-all relative flex flex-col justify-center cursor-pointer ${
                                                     isSelected 
-                                                      ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)]'
+                                                      ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)] bg-accent/15 border-accent'
                                                       : 'bg-black/30 border-[#5A3D2D] hover:border-amber-900/60'
                                                  }`}
                                               >
@@ -508,17 +533,6 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                         })}
                                      </div>
                                   </div>
-
-                                  {/* Step 3: Evaluate Testimony Reliability Component */}
-                                  <ReliabilityPanel
-                                    selectedReliability={selectedReliability}
-                                    onSelect={setSelectedReliability}
-                                    selectedContradictionId={selectedContradictionId}
-                                    selectedJustificationId={selectedJustificationId}
-                                    onSelectJustification={setSelectedJustificationId}
-                                    inventory={gameState.inventory}
-                                    reliabilityReasonNeeded={!!trialStep.reliabilityReason}
-                                  />
                                </div>
 
                                <button 
@@ -526,11 +540,11 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                    onClick={handleExecuteContradiction}
                                    className={`w-full py-4 border-2 uppercase font-bold text-[10px] tracking-widest shadow-md transition-all cursor-pointer ${
                                       selectedContradictionId && selectedLawCardId && (!trialStep.reliabilityReason || (selectedReliability && selectedJustificationId))
-                                        ? 'bg-accent text-white border-accent hover:bg-black hover:text-white'
+                                        ? 'bg-accent text-white border-accent hover:bg-black hover:text-white hover:border-white'
                                         : 'bg-[#180E0A] text-amber-100/20 border-amber-950/20 cursor-not-allowed'
                                    }`}
                                >
-                                   VERIFY DOCKET CONTRADICTION & RELIABILITY
+                                   SUBMIT INTERPRETATION & EXPOSE CONTRADICTION
                                </button>
                              </>
                            ) : (
