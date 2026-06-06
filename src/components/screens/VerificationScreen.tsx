@@ -334,8 +334,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
         authenticity: AuthenticityStatus.VERIFIED,
         admissibility: AdmissibilityStatus.ADMITTED,
         hasBSACertificate: true,
-        admissibilityStrength: 98,
-        courtConfidence: Math.round(0.6 * (e.credibility || 85) + 0.4 * 98)
+        admissibilityStrength: 98
       }))
     }));
   };

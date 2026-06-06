@@ -476,8 +476,8 @@ export default function InvestigationHub({ gameState, currentCase, setGameState 
 
                      <div className="p-5 border-2 border-accent border-dashed bg-accent/5 mt-4 space-y-4">
                         <div className="flex items-center justify-between text-accent border-b border-accent/20 pb-2">
-                           <span className="mono text-[9px] font-bold uppercase tracking-widest">Weighted Confidence Index</span>
-                           <span className="mono font-bold text-sm bg-accent text-white px-2 py-0.5">{selectedEvidence.courtConfidence}%</span>
+                           <span className="mono text-[9px] font-bold uppercase tracking-widest">Forensic Value Breakdown</span>
+                           <span className="mono font-bold text-sm bg-accent text-white px-2 py-0.5">STANDARDIZED</span>
                         </div>
                         
                         <div className="grid grid-cols-3 gap-2 text-ink">

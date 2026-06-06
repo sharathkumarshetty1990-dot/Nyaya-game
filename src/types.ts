@@ -59,7 +59,6 @@ export interface Evidence {
   type: EvidenceType;
   authenticity: AuthenticityStatus;
   admissibility: AdmissibilityStatus;
-  courtConfidence: number; // 0-100
   credibility: number; // 0-100 (authenticity & forensic alignment score)
   admissibilityStrength: number; // 0-100 (procedural/BSA compliance)
   judgeImpact: number; // 0-100 (narrative/emotional impact on Justice Singh)

@@ -577,7 +577,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                         </div>
                         <div className="flex items-center justify-between text-[8px] mb-2">
                            <span className="mono text-amber-100/40 font-bold uppercase">{item.authenticity} // {item.admissibility}</span>
-                           <span className="mono text-amber-500 font-bold uppercase">{item.courtConfidence}% CONF</span>
+                           <span className="mono text-amber-500 font-bold uppercase">REF_{item.id.toUpperCase()}</span>
                         </div>
                         
                         {/* Three separate dimensions bar display */}
@@ -605,7 +605,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                   Judicial Notes
                </div>
                <p className="text-[10px] text-amber-100/40 leading-relaxed italic border-l-2 border-accent pl-3">
-                 Court confidence is currently {(gameState.inventory.reduce((acc, curr) => acc + (curr.courtConfidence || 0), 0) / (gameState.inventory.length || 1)).toFixed(0)}%. 
+                 Admissibility relies on strict BSA Section 63 certificates. 
                  Presentation of uncertified digital bytes or inconsistent artifacts risks sudden contempt triggers and witness loss-of-faith logs.
                </p>
             </div>

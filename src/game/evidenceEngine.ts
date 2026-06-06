@@ -18,8 +18,7 @@ export const verifyEvidence = (evidence: Evidence, state: GameState): Evidence =
   return { 
     ...evidence, 
     authenticity: AuthenticityStatus.VERIFIED,
-    credibility: newCredibility,
-    courtConfidence: Math.round(0.6 * newCredibility + 0.4 * newAdmissibilityStrength)
+    credibility: newCredibility
   };
 };
 
@@ -39,8 +38,7 @@ export const certifyEvidence = (evidence: Evidence): Evidence => {
     ...evidence, 
     admissibility: AdmissibilityStatus.ADMITTED, 
     hasBSACertificate: true,
-    admissibilityStrength: newAdmissibilityStrength,
-    courtConfidence: Math.round(0.6 * newCredibility + 0.4 * newAdmissibilityStrength)
+    admissibilityStrength: newAdmissibilityStrength
   };
 };
 

@@ -25,10 +25,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Slamming his heavy brass gavel down with an aggressive, deafening crash, adjusting his gold-rimmed spectacles)* "Counsel! Enough of this procedural play-acting! This bench rules on iron-clad, dual-signature statutory evidence. If the prosecution brings raw pixelated screenshots without valid BSA Section 63 certification, I will exclude them with prejudice! Present admissibility clearance or expect immediate compliance warnings!"`;
+        return `*(Staring down with icy, lethal calm)* "Counsel, answer the question. This bench concerns itself solely with iron-clad, statutory evidence. If you expect this court to accept raw uncertified pixels, you are mistaken. Present admissibility clearance immediately."`;
       }
       if (pressure > 50) {
-        return `*(Frowning sternly, looking down from his elevated teak podium)* "Counsel, my patience has statutory boundaries. The Bharatiya Sakshya Adhiniyam is not a guideline; it is the legislative command. Your arguments are becoming worryingly narrative-heavy. Stick strictly to the evidentiary corpus!"`;
+        return `*(Gazing coldly at you)* "You are testing my patience, Counsel. The BSA is not a suggestion; it is the law. Stick to the certified evidence. No more narratives."`;
       }
       return originalText;
     }
@@ -41,10 +41,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Clutching a folded linen handkerchief, wiping cold sweat from his neck as his voice rises in a trembling register)* "...I... I can't think. The courtroom is spinny... They said they were Lucknow Cyber CID... they knew my address, my old school ledger! I always sign my formal notes with 'Regards, Principal Sharma' and when they showed me that official digital warrant with those exact words... my chest went cold. Those monsters... please, they have locked everything... my pension is gone!"`;
+        return `*(Trembling, swallowing hard)* "They sent a video-arrest warrant. Because it had my own signature habit—'Regards, Principal Sharma'—I was utterly frozen. I thought they were real authorities. My savings are gone."`;
       }
       if (pressure > 50) {
-        return `*(Staring down at his shaking, weathered hands, a tremor in his lip)* "Yes, I... I grading old matriculation sheets under my desk lamp... when the calling screen turned that cold, metallic gray. They spoke of money laundering in Lucknow High Court barracks. I thought I was assisting the national interest... They were so authoritative..."`;
+        return `*(Staring down at his hands)* "I was grading exam papers when they called. They looked so official. I believed them when they mentioned Lucknow."`;
       }
       return originalText;
     }
@@ -57,10 +57,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Digital transcript terminal flashes amber, signaling protocol anomaly)* "[SYSTEM WARNING: PACKET ROUTE GLITCH] // CBI_Lucknow_Barracks: 'You are under absolute arrest. The Supreme Court database is locked on escrow ID 4402. Attempting to contest this sovereign cyber-warrant constitutes direct contempt. Secure the liquid assets immediately or suffer immediate state suppression.'"`;
+        return `"You are under absolute arrest. The Supreme Court database has locked your account. Attempting to contest this sovereign cyber-warrant constitutes contempt. Transfer safe-keeping funds immediately."`;
       }
       if (pressure > 50) {
-        return `*(Projected transcript text jittering)* "[PROTOCOL MIGRATION] // Inspector Amit Sen: 'We are acting under closed judicial supervision from the cyber barracks. Personal attendance is forbidden under national security parity. Provide biometric authorization to the safe-keeping fund now.'"`;
+        return `"We are acting under closed judicial supervision from the Lucknow cyber barracks. Provide authentication to the safekeeping fund now."`;
       }
       return originalText;
     }
@@ -73,10 +73,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Perspiring slightly, desperately flipping through a thick leather folder, losing his smug tone)* "Objection, Your Honor! The prosecution is using... technical anomalies and minor clock offsets to confuse the court! Yes, the timestamp shows UTC metadata, but... but that is a simple regional sync quirk! Human error! We must not reject the foundational testimony on frivolous technicalities!"`;
+        return `*(Sweating slightly, losing his smirk)* "Objection! The prosecution is relying on irrelevant clock offsets. This is a simple timezone quirk. Do not throw out our defense on a triviality."`;
       }
       if (pressure > 50) {
-        return `*(Tapping on the thick mahogany desk, throwing a smug glance at the gallery)* "A tragedy does not substitute legal certitude, Your Honor. The prosecution offers raw digital files with zero validated certificates. Under the strict authority of BSA, this screenshot is legally non-existent. It must be thrown out!"`;
+        return `*(Leaning forward smugly)* "No dual-signature certificate, no evidence. This screenshot is legally non-existent under the BSA."`;
       }
       return originalText;
     }
@@ -90,11 +90,6 @@ export function resolveDynamicDialogue(speaker: string, originalText: string, pr
   const profile = CHARACTER_REGISTRY[speaker];
   if (profile) {
     return profile.getDynamicDialogue(originalText, pressureMeter);
-  }
-  
-  // Generic character compression under severe pressure
-  if (pressureMeter > 80) {
-    return `*(Stuttering under immense pressure)* "... ${originalText.replace(/ the /gi, ' ... the ').replace(/\. /g, '... I... ')} [ATMOSPHERE: EXTENSE TENSION]"`;
   }
   
   return originalText;
