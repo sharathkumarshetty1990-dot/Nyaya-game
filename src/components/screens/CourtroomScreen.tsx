@@ -165,14 +165,29 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
 
     if (!expectedEvidenceId) return;
 
-    // 1. Check if the player selected the correct evidence
-    if (selectedItem.id !== expectedEvidenceId) {
+    const isEvidenceCorrect = selectedItem.id === expectedEvidenceId;
+
+    // 1. Evaluate if the selected evidence card actually matches the targets
+    if (!isEvidenceCorrect) {
       audioService.playBuzzer();
+      let irrMessage = '';
+      if (selectedItem.id === 'wa-ss') {
+        irrMessage = `REJECTED. WhatsApp call metadata cannot establish officer memory accuracy, alibis, or police boundaries. Unrelated exhibit.`;
+      } else if (selectedItem.id === 'cbi-logo') {
+        irrMessage = `REJECTED. Pixelated logo analysis is irrelevant to coercion, personal alibis, or police boundaries. Unrelated exhibit.`;
+      } else if (selectedItem.id === 'newspaper-cji') {
+        irrMessage = `REJECTED. Press reports concerning judicial location are irrelevant to coercion, visual memory, or local police boundaries. Unrelated exhibit.`;
+      } else if (selectedItem.id === 'zero-fir-receipt') {
+        irrMessage = `REJECTED. Station FIR registration receipts do not prove coercion, recollective accuracy, or travel alibis. Unrelated exhibit.`;
+      } else {
+        irrMessage = `REJECTED. The presented exhibit has no logical bearing on the witness's statement. Unrelated exhibit.`;
+      }
+
       setContradictionResult({
         status: 'failure',
-        message: `MISTAKEN DEDUCTION! You stand and present the ${selectedItem.name} to challenge the witness's statement. The Defense Counsel scoffs: "Counsel is shooting in the dark. How does this exhibit prove a logical contradiction?" Justice G. Singh shakes his head in deep irritation: "Counsel, do not waste this bench's time with unrelated dockets. Focus on the core of the testimony!"`
+        message: irrMessage
       });
-      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 12) }));
       setPressureAnim(true);
       setTimeout(() => setPressureAnim(false), 500);
       return;
@@ -184,9 +199,9 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       audioService.playBuzzer();
       setContradictionResult({
         status: 'inadmissible',
-        message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the correct item and diagnose the unreliability cause as ${selectedReliability?.replace('_', ' ').toUpperCase() || 'none'}. However, because you did NOT certify this digital exhibit in the Verification Suite, the Defense Counsel leaps up: "Objection! Under Bharatiya Sakshya Adhiniyam Section 63, electronic logs are legally inadmissible without a fully signed BSA digital hash certificate!" Justice G. Singh nods: "Sustained. Excellent legal deduction, but I cannot legally admit uncertified digital material. You must verify and certify your files first!"`
+        message: `EXCLUDED. Exhibit ${selectedItem.name} supports the theory. However, under BSA Section 63, uncertified electronic files are legally inadmissible. Relog custody hash in the Verification Suite first.`
       });
-      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
+      setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 10) }));
       setPressureAnim(true);
       setTimeout(() => setPressureAnim(false), 500);
       return;
@@ -232,7 +247,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       message = `PARTIAL COMPLIANCE. Statutory citation of ${selectedLaw?.section} is correct, admitting the exhibit. However, the diagnosed reliability cause (${selectedReliabilityKey.replace('_', ' ').toUpperCase()}) is incorrect. Fact admitted but theoretical standing penalized.`;
     } else {
       status = 'weak';
-      message = `WEAK ADJUDICATION. Exhibit matched, but both statutory citing and reliability diagnostics failed. Admissibility restricted with judicial warning.`;
+      message = `WEAK ADJUDICATION. Exhibit matched, but both statutory selection and reliability diagnosis are wrong. Re-evaluate.`;
     }
 
     // Save choice in game state
