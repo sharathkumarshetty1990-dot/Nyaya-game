@@ -25,10 +25,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Staring down with icy, lethal calm)* "Counsel, answer the question. This bench concerns itself solely with iron-clad, statutory evidence. If you expect this court to accept raw uncertified pixels, you are mistaken. Present admissibility clearance immediately."`;
+        return `"Counsel. Answer the question. This bench demands statutory evidence, not raw uncertified pixels. Present formal admissibility clearance."`;
       }
       if (pressure > 50) {
-        return `*(Gazing coldly at you)* "You are testing my patience, Counsel. The BSA is not a suggestion; it is the law. Stick to the certified evidence. No more narratives."`;
+        return `"The BSA is law, Counsel. Not a suggestion. Stick strictly to certified evidence."`;
       }
       return originalText;
     }
@@ -41,10 +41,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Trembling, swallowing hard)* "They sent a video-arrest warrant. Because it had my own signature habit—'Regards, Principal Sharma'—I was utterly frozen. I thought they were real authorities. My savings are gone."`;
+        return `"They sent a warrant. Because it had my 'Regards, Principal Sharma' signature habit, I was frozen. I believed they were real."`;
       }
       if (pressure > 50) {
-        return `*(Staring down at his hands)* "I was grading exam papers when they called. They looked so official. I believed them when they mentioned Lucknow."`;
+        return `"They spoke of लखनऊ cyber barracks. They knew my details. I believed them."`;
       }
       return originalText;
     }
@@ -57,10 +57,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"You are under absolute arrest. The Supreme Court database has locked your account. Attempting to contest this sovereign cyber-warrant constitutes contempt. Transfer safe-keeping funds immediately."`;
+        return `"Sovereign cyber-warrant active. Secure assets under escrow ID 4402 immediately or suffer contempt of court detention."`;
       }
       if (pressure > 50) {
-        return `"We are acting under closed judicial supervision from the Lucknow cyber barracks. Provide authentication to the safekeeping fund now."`;
+        return `"Under Lucknow cyber barracks jurisdiction. Transfer safekeeping funds to resolve state inquiry."`;
       }
       return originalText;
     }
@@ -73,10 +73,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `*(Sweating slightly, losing his smirk)* "Objection! The prosecution is relying on irrelevant clock offsets. This is a simple timezone quirk. Do not throw out our defense on a triviality."`;
+        return `"Objection. Regional timestamp quirks are trivial. The prosecution is obfuscating focus."`;
       }
       if (pressure > 50) {
-        return `*(Leaning forward smugly)* "No dual-signature certificate, no evidence. This screenshot is legally non-existent under the BSA."`;
+        return `"No statutory dual-signature certificate, no admissibility. The screenshot remains legally void."`;
       }
       return originalText;
     }

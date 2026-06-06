@@ -43,17 +43,6 @@ export const certifyEvidence = (evidence: Evidence): Evidence => {
 };
 
 /**
- * Logical check for contradictions based on the entire inventory.
- */
-export const findContradiction = (targetId: string, inventory: Evidence[]): Evidence | null => {
-  const target = inventory.find(e => e.id === targetId);
-  if (!target || !target.contradicts) return null;
-  
-  const contradictingItem = inventory.find(e => target.contradicts?.includes(e.id));
-  return contradictingItem || null;
-};
-
-/**
  * Complex admissibility check.
  * Digital evidence MUST be certified. 
  * Physical evidence must be verified.

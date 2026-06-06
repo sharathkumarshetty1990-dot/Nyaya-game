@@ -58,7 +58,6 @@ export const EVIDENCE_POOL: Evidence[] = [
     authenticityRisk: 'Timestamp mismatch detected. Possible causes: Manual edits, timezone sync issues, or server cache discrepancy.',
     bsaSection: 'BSA 63',
     linkedEvidenceIds: ['cbi-logo'],
-    contradicts: ['sho-alibi'],
     supports: ['newspaper-cji']
   },
   {

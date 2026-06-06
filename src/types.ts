@@ -70,7 +70,6 @@ export interface Evidence {
   
   // Relational Depth
   linkedEvidenceIds: string[];
-  contradicts?: string[];
   supports?: string[];
   requires?: string[];
 }

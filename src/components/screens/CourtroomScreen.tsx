@@ -214,25 +214,25 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     if (isLawCorrect && isReliabilityCorrect) {
       status = 'strong';
       if (targetStepId === 'virendra-pressure-check') {
-        message = `FLAWLESS ARGUMENT! You present the certified WhatsApp screenshot showing the +44 VoIP country code, cite BNS Section 308 (Extortion), and successfully diagnose PRESSURE as the witness's state of mind. Justice G. Singh thunders: "Excellent! Under BNS Section 308, direct coercion and video-called threats completely negate voluntary consent. The signature on the declaration is empty and inadmissible! This bench accepts your argument, Counsel."`;
+        message = `ADMISSIBLE. Under BNS Section 308, direct coercion and video-called threats completely negate voluntary consent. Presenting the certified WhatsApp screenshot proves coercion. The declaration is ruled void and excluded.`;
       } else if (targetStepId === 'mishra-memory-check') {
-        message = `FLAWLESS ARGUMENT! You project the low-res pixelated CBI uniform logo, cite BSA Section 63 (Special Provisions for electronic evidence), and diagnose MEMORY ERROR. Justice G. Singh nods with approval: "Outstanding, Counsel! Under the extreme pressure of an active raid, Sub-Inspector Mishra reconstructed a physical gold seal from background expectations. The digital compression analysis proves the emblem was actually a pixel-painted overlay. The witness simply made an honest, stress-induced cognitive mistake. The objection is sustained!"`;
+        message = `SUSTAINED. Under BSA Section 63, electronic analysis of pixel structures proves the logo is a digital overlay. Officer Mishra's recollection is a cognitive memory error. No physical stamp existed.`;
       } else if (targetStepId === 'perjury-check') {
-        message = `FLAWLESS ARGUMENT! You present the Lucknow Times newspaper clipping, cite BNS Section 318 (Cheating by Personation), and diagnose active DECEPTION. Justice G. Singh slams his pen down: "Superb! The newspaper proves the Chief Justice of India was presiding in New Delhi Court Room 1, making any meeting with Amit Sen in Lucknow physically impossible. This is deliberate, calculated cyber-impersonation and perjury under BNS 318. Exceptionally presented, Counsel!"`;
+        message = `DECEPTION CONFIRMED. Under BNS 318, the alibi is perjury. Official newspaper reports place the CJI in Delhi on April 14, making the alleged Lucknow barracks meeting physically impossible.`;
       } else if (targetStepId === 'dixit-procedural-check') {
-        message = `FLAWLESS ARGUMENT! You submit the Zero FIR receipt, cite BNSS Section 173 (Zero FIR), and diagnose PROCEDURAL CONFUSION. Justice G. Singh smiles: "A precise procedural strike, Counsel! Under BNSS 173, stations are legally mandated to register digital and cyber-crime complaints immediately, regardless of regional borders, under a Zero FIR protocol. Officer Dixit was stuck in outdated municipal geography habits. Perfect legal reasoning!"`;
+        message = `PROCEDURAL BYPASS ADOPTED. Under BNSS Section 173, Zero FIR registration is mandatory for regional complaints of digital crime. Station territorial objections are ruled void.`;
       } else {
-        message = `FLAWLESS ARGUMENT! You present the ${selectedItem.name}, cite the correct statutory code ${selectedLaw?.section}, and diagnose the witness reliability issue as ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} perfectly. Justice G. Singh thunders: "Indeed! Your logical formula is ironclad and fully accepted."`;
+        message = `FLAWLESS ARGUMENT. Exhibit ${selectedItem.name} admitted under ${selectedLaw?.section} with correct reliability diagnosis of ${selectedReliabilityKey.toUpperCase()}. The court accepts the filing.`;
       }
     } else if (isReliabilityCorrect) {
       status = 'partial';
-      message = `PARTIAL SUCCESS. You present the correct file and diagnose ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} correctly. However, you cited the WRONG statutory code (you selected ${selectedLaw ? selectedLaw.section : 'none'} instead of the controlling section for this matter)! Justice G. Singh adjusts his gold-rimmed spectacles: "Counsel, your psychological analysis is accurate, but your statutory citation is incorrect. Refer to the controlling codes under our new laws! I will sustain your factual point, but correct your formal brief before filing!"`;
+      message = `PARTIAL COMPLIANCE. Reliability diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} is factually correct. However, the cited statute (${selectedLaw ? selectedLaw.section : 'none'}) is legally incorrect for this challenge. Brief sustained on facts but marked with a statutory penalty.`;
     } else if (isLawCorrect) {
       status = 'partial';
-      message = `PARTIAL SUCCESS. You present the correct file and cite the controlling law (${selectedLaw?.section}) flawlessly. However, you misidentified the human reliability cause as ${selectedReliabilityKey.replace('_', ' ').toUpperCase()}! Justice G. Singh raises his hand: "Your statutory base is entirely correct, and the exhibit stands. But your human diagnosis is skewed. This witness does not exhibit ${selectedReliabilityKey.replace('_', ' ').toLowerCase()}; check your cognitive and psychological parameters! I will record the objection, but keep your arguments crisp!"`;
+      message = `PARTIAL COMPLIANCE. Statutory citation of ${selectedLaw?.section} is correct, admitting the exhibit. However, the diagnosed reliability cause (${selectedReliabilityKey.replace('_', ' ').toUpperCase()}) is incorrect. Fact admitted but theoretical standing penalized.`;
     } else {
       status = 'weak';
-      message = `WEAK ADJUDICATION! You present the correct exhibit, but cite the wrong statute (${selectedLaw ? selectedLaw.section : 'none'}) AND misclassify the reliability state as ${selectedReliabilityKey.replace('_', ' ').toUpperCase()}! Justice G. Singh sighs deeply: "This is a highly disorganized legal argument, Counsel. You happened to match the correct exhibit file, but your legal foundation and human diagnostics are completely misaligned. I will allow the fact to stand, but your standing with this bench is severely degraded!"`;
+      message = `WEAK ADJUDICATION. Exhibit matched, but both statutory citing and reliability diagnostics failed. Admissibility restricted with judicial warning.`;
     }
 
     // Save choice in game state

@@ -13,7 +13,6 @@ export const GameEngine = {
   // Evidence Engine
   verifyEvidence: EvidenceEngine.verifyEvidence,
   certifyEvidence: EvidenceEngine.certifyEvidence,
-  findContradiction: EvidenceEngine.findContradiction,
   isEvidenceAdmissible: EvidenceEngine.isEvidenceAdmissible
 };
 
