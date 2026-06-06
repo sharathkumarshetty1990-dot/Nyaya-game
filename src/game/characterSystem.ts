@@ -25,10 +25,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `"Counsel. Answer the question. This bench demands statutory evidence, not raw uncertified pixels. Present formal admissibility clearance."`;
+        return `"Counsel. Evidence. My bench demands statutory proof, not uncertified pixels. Status?"`;
       }
       if (pressure > 50) {
-        return `"The BSA is law, Counsel. Not a suggestion. Stick strictly to certified evidence."`;
+        return `"Admissibility? The BSA is law, Counsel. Stick to certified exhibits."`;
       }
       return originalText;
     }

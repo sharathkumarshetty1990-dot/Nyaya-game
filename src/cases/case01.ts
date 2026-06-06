@@ -5,24 +5,24 @@ const trialFlow: TrialStep[] = [
     id: 'intro',
     type: 'statement',
     speaker: 'Justice G. Singh',
-    text: "We are evaluating digital exhibits in State vs Unknown. Scammers targeted a senior citizen posing as CBI. Prosecution, lay out your case. Remember, this court is bound strictly by the provisions of BSA Sec 63.",
+    text: "Evaluating digital exhibits in State vs Unknown. Cyber fraud targeting a senior citizen. Lay out your case, Prosecution. We are bound strictly by BSA Section 63.",
     impactOnPressure: 2,
-    narrativeStateNote: "The judge adjusts his spectacles, looking sternly at the counsel table."
+    narrativeStateNote: "The court is seated."
   },
   {
     id: 'witness-virendra-opening',
     type: 'statement',
     speaker: 'Virendra Sharma',
-    text: "On April 14, they video-called claiming my pension was linked to money laundering. They sent a digital arrest warrant signed 'Regards, Principal Sharma'—my own WhatsApp signature habit! That is how they tricked me into compliance.",
+    text: "On April 14, I received a video call claiming pension link to money laundering. They sent a digital arrest warrant signed 'Regards, Principal Sharma'—reproducing my own WhatsApp signature. Confused by this habit, I complied.",
     impactOnPressure: 5,
-    narrativeStateNote: "Virendra's voice breaks. He grips a folded handkerchief, staring down at his hands."
+    narrativeStateNote: "Witness is under oath."
   },
   {
     id: 'defense-objection-1',
     type: 'objection',
     speaker: 'Defense Counsel',
-    text: "Objection, Your Honor! The prosecution relies on a raw JPEG screenshot of a WhatsApp conversation. Under BSA Sec 63, electronic files are inadmissible without a dual-signature certificate. This screenshot is uncertified and must be excluded!",
-    narrativeStateNote: "The defense attorney taps a heavy legal binder on the desk.",
+    text: "Objection! The prosecution relies on a raw JPEG screenshot of a WhatsApp chat. Under BSA Section 63, electronic files are inadmissible without a dual-signature certificate. This screenshot is uncertified. It must be excluded.",
+    narrativeStateNote: "Defense objects.",
     options: [
       {
         id: 'opt-submit-certified',
@@ -64,41 +64,41 @@ const trialFlow: TrialStep[] = [
     id: 'virendra-pressure-check',
     type: 'statement',
     speaker: 'Virendra Sharma',
-    text: "They coerced me to transfer funds and sign a declaration saying it was voluntary. I was terrified for my daughter's safety. Does a statement signed under live video-call coercion hold anyway?",
+    text: "They forced me to transfer funds and sign a 'voluntary' declaration over video call, threatening my daughter. Does a coerced digital statement hold?",
     contradictionEvidenceId: 'wa-ss',
     reliabilityReason: 'pressure',
     impactOnJustice: 15,
-    narrativeStateNote: "Virendra stands trembling, pleading with the court."
+    narrativeStateNote: "The witness stands."
   },
   {
     id: 'mishra-memory-check',
     type: 'statement',
     speaker: 'Sub-Inspector Mishra',
-    text: "During our high-stress raid on April 14, we recovered a pristine, physical CBI boss stamp. I distinctly recall the golden metal seal centered on the scammers' papers, proving they used high-grade physical stamps.",
+    text: "In the April 14 raid, we recovered a gold CBI stamp. I recall it centered on their papers. They must have physical stamps.",
     contradictionEvidenceId: 'cbi-logo',
     reliabilityReason: 'memory_error',
     impactOnJustice: 15,
-    narrativeStateNote: "The Sub-Inspector sits upright, confident in his visual recollections."
+    narrativeStateNote: "The officer is under oath."
   },
   {
     id: 'perjury-check',
     type: 'statement',
     speaker: 'CBI Poser (Transcript)',
-    text: "Surveillance logs show the victim communicating with foreign hostile nodes. I, Inspector Amit Sen, personally verified this from Lucknow cyber barracks on April 14 after meeting the CJI.",
+    text: "Surveillance logs showed foreign node communication. I verified this from Lucknow cyber barracks on April 14 after meeting the CJI.",
     contradictionEvidenceId: 'newspaper-cji',
     reliabilityReason: 'deception',
     impactOnJustice: 15,
-    narrativeStateNote: "The transcript is displayed on the screen."
+    narrativeStateNote: "Transcript projected."
   },
   {
     id: 'dixit-procedural-check',
     type: 'statement',
     speaker: 'Station Officer Dixit',
-    text: "We refused to record the case on April 14 because Hazratganj has no territorial authority over Gomti Nagar. Stations are strictly region-locked, regardless of any digital context.",
+    text: "Complaint registration is strictly region-locked. Hazratganj lacks territorial authority over Gomti Nagar. We could not register on April 14.",
     contradictionEvidenceId: 'zero-fir-receipt',
     reliabilityReason: 'procedural_confusion',
     impactOnJustice: 15,
-    narrativeStateNote: "Dixit folds his arms, defending his station's delay."
+    narrativeStateNote: "The officer is under oath."
   },
   {
     id: 'final-judgment',
@@ -106,7 +106,7 @@ const trialFlow: TrialStep[] = [
     speaker: 'Justice G. Singh',
     text: "Arguments are concluded. The court will now rule on the admissibility and truth of the exhibits under the strict letters of the BSA. Clerk, prepare the docket.",
     impactOnPressure: 15,
-    narrativeStateNote: "The judge has his pen ready. The courtroom is silent."
+    narrativeStateNote: "The court waits."
   }
 ];
 
