@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { GameState, Case, AuthenticityStatus, AdmissibilityStatus, TrialStepOption, Evidence } from '../../types';
 import { GameEngine } from '../../game/gameEngine';
 import { resolveDynamicDialogue } from '../../game/characterSystem';
+import { LAW_CARDS } from '../../constants';
 import { audioService } from '../../game/audio';
 import Typewriter from '../Typewriter';
 import { 
@@ -34,6 +35,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
   const [showContradiction, setShowContradiction] = useState(false);
   const [selectedContradictionId, setSelectedContradictionId] = useState<string | null>(null);
   const [selectedReliability, setSelectedReliability] = useState<'deception' | 'memory_error' | 'pressure' | 'procedural_confusion' | null>(null);
+  const [selectedLawCardId, setSelectedLawCardId] = useState<string | null>(null);
   const [contradictionResult, setContradictionResult] = useState<{
     status: 'success' | 'failure' | 'inadmissible' | 'strong' | 'partial' | 'weak' | null;
     message: string;
@@ -87,6 +89,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
           setShowContradiction(true);
           setSelectedContradictionId(null);
           setSelectedReliability(null);
+          setSelectedLawCardId(null);
           setContradictionResult({ status: null, message: '' });
         }, 1100);
       } else {
@@ -181,7 +184,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       audioService.playBuzzer();
       setContradictionResult({
         status: 'inadmissible',
-        message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the correct item and diagnose the unreliability cause as ${selectedReliability?.replace('_', ' ').toUpperCase() || 'none'}. However, because you did NOT certify this digital exhibit in the Verification Suite, the Defense Counsel leaps up: "Objection! Under Bharatiya Sakshya Adhiniyam Section 63, electronic logs are legally inadmissible without a fully signed BSA digital hash certificate!" Justice G. Singh nods: "Sustained. Excellent legal deduction, but I cannot legally admit uncertified digital material. You must verify your files first!"`
+        message: `PERSUASIVE BUT PROCEDURALLY INVALID (Inadmissible)! You present the correct item and diagnose the unreliability cause as ${selectedReliability?.replace('_', ' ').toUpperCase() || 'none'}. However, because you did NOT certify this digital exhibit in the Verification Suite, the Defense Counsel leaps up: "Objection! Under Bharatiya Sakshya Adhiniyam Section 63, electronic logs are legally inadmissible without a fully signed BSA digital hash certificate!" Justice G. Singh nods: "Sustained. Excellent legal deduction, but I cannot legally admit uncertified digital material. You must verify and certify your files first!"`
       });
       setGameState(prev => ({ ...prev, pressureMeter: Math.min(100, prev.pressureMeter + 15) }));
       setPressureAnim(true);
@@ -189,92 +192,48 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       return;
     }
 
-    // Lookup table for our dynamic narrative reactions based on player's reliability diagnosis
-    // This allows active branching and has direct scoring consequences
-    const RELIABILITY_LOOKUP: Record<string, Record<string, { status: 'strong' | 'partial' | 'weak'; message: string }>> = {
-      'virendra-pressure-check': {
-        pressure: {
-          status: 'strong',
-          message: `STRONG ADJUDICATION! You prove that the victim signed the money transfer under active (+44) video intimidation and extortionate threat of arrest. Justice G. Singh thunders: "Indeed! Under BNS 308 (Coercion), systemic duress negates voluntary consent. The signature is a nullity! Perfectly diagnosed, Counsel."`
-        },
-        deception: {
-          status: 'partial',
-          message: `PARTIAL SUCCESS. You argue the fake +44 mask constitutes BNS 318 deceptive impersonation. G. Singh nods: "While digital impersonation occurred, the signature's actual invalidity stems from direct coercion, not mere fraud. A slightly misfocused but acceptable diagnosis."`
-        },
-        memory_error: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You claim Virendra suffered from memory inaccuracies. Virendra is offended: "I remember the terror perfectly!" G. Singh: "Suggesting memory failure under active sequestration is naive. Duress, not memory, is the core constraint here. Proceeding solely on the evidence."`
-        },
-        procedural_confusion: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You argue bank layout or procedural confusion rules applied. G. Singh: "Counsel, this is a live extortion, not a technical contract error. The victim signed because his family was threatened. Duress is the core mechanism."`
-        }
-      },
-      'mishra-memory-check': {
-        memory_error: {
-          status: 'strong',
-          message: `STRONG ADJUDICATION! You project the low-res pixelated overlays of the scammers' fake uniform. G. Singh: "Outstanding. Under the stress of an active raid, SI Mishra reconstructed a physical 'golden crest' from expectation. Human memory is reconstructive; this is a classic cognitive memory error."`
-        },
-        deception: {
-          status: 'partial',
-          message: `PARTIAL SUCCESS. You accuse SI Mishra of collusion or intentional deceit. Mishra is outraged. G. Singh: "Order! There is zero proof of collusion. The digital artifacts prove the stamp was a projection, meaning Mishra was simply mistaken, not lying."`
-        },
-        pressure: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You claim Mishra was pressured into testimony. G. Singh: "Extremely speculative. A police raiding team faces no coercion here. The visual artifacts simply show Mishra's recollection was scientifically wrong. Proceeding with caution."`
-        },
-        procedural_confusion: {
-          status: 'partial',
-          message: `PARTIAL SUCCESS. You claim search and seizure protocol under BNSS was confused. G. Singh: "While local raid logs are sloppy, the issue is his mistaken visual assertion of a physical stamp. It is a recollective failure, not a protocol error."`
-        }
-      },
-      'perjury-check': {
-        deception: {
-          status: 'strong',
-          message: `STRONG ADJUDICATION! Your certified news copy matches the CJI's live bench in Delhi, exposing 'Amit Sen' as a phantom. G. Singh: "Pure perjury and deliberate deception under BSA Sec 63. This is not a mistake; it is a calculated impersonation and fraud to execute a fake arrest!"`
-        },
-        memory_error: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You argue the impersonator simply made a scheduling error. G. Singh sighs: "A scammer spoofing warrants does not suffer from a simple diary error, Counsel. They are actively deceiving. This is a highly naive diagnosis."`
-        },
-        pressure: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You claim the fake Inspector was forced by others. G. Singh: "Highly speculative. The perpetrator is the source of the duress, not its target. The log serves to execute the cheat."`
-        },
-        procedural_confusion: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You argue the poser was confused on legal meeting rules. G. Singh: "Meeting a Delhi-bound Chief Justice in Lucknow is not legal confusion, Counsel. It is a fabricated alibi. Focus on the core fraud."`
-        }
-      },
-      'dixit-procedural-check': {
-        procedural_confusion: {
-          status: 'strong',
-          message: `STRONG ADJUDICATION! You present the Hazratganj Zero FIR. Under BNSS Sec 173, cyber crimes must be logged instantly regardless of borders. G. Singh: "Indeed. Dixit-ji was locked in outdated municipal geography habits. A textbook case of procedural confusion!"`
-        },
-        deception: {
-          status: 'partial',
-          message: `PARTIAL SUCCESS. You accuse Dixit of deliberate bad faith or collusion. Dixit objects. G. Singh: "We see no conspiracy, only a station officer following obsolete jurisdictional manuals. Your receipt is valid, but your accusation is uncalled for."`
-        },
-        memory_error: {
-          status: 'partial',
-          message: `PARTIAL SUCCESS. You argue Dixit forgot his instructions. Dixit: "I remember our codes!" G. Singh: "Indeed. He did not forget; he failed to apply the new BNSS Zero-FIR cross-territory mandates. That represents confusion of legal codes."`
-        },
-        pressure: {
-          status: 'weak',
-          message: `WEAK SUCCESS. You claim Dixit was blackmailed. Dixit: "Unfounded!" G. Singh: "The delay stems from bureaucratic territorial inertia, not criminal extortion. This diagnostic misses the administrative focus."`
-        }
-      }
-    };
+    // Determine expected Law Card for this step
+    const targetStepId = trialStep.id;
+    let expectedLawId = '';
+    if (targetStepId === 'virendra-pressure-check') expectedLawId = 'bns-308';
+    else if (targetStepId === 'mishra-memory-check') expectedLawId = 'bsa-63';
+    else if (targetStepId === 'perjury-check') expectedLawId = 'bns-318';
+    else if (targetStepId === 'dixit-procedural-check') expectedLawId = 'bnss-173';
+
+    const selectedLaw = LAW_CARDS.find(l => l.id === selectedLawCardId);
+    const selectedReliabilityKey = selectedReliability || 'deception';
+
+    const isLawCorrect = selectedLawCardId === expectedLawId;
+    const isReliabilityCorrect = selectedReliabilityKey === expectedReliability;
 
     audioService.playSuccess();
-    
-    // Select outcome
-    const targetStepId = trialStep.id;
-    const selectedReliabilityKey = selectedReliability || 'deception';
-    const resolvedOutcome = RELIABILITY_LOOKUP[targetStepId]?.[selectedReliabilityKey] || {
-      status: 'strong',
-      message: `STRONG CONTRADICTION ACCEPTED! You present the ${selectedItem.name} and successfully impeach the witness's statement. G. Singh strikes his gavel: "Clear contradiction established."`
-    };
+
+    let status: 'strong' | 'partial' | 'weak' = 'weak';
+    let message = '';
+
+    if (isLawCorrect && isReliabilityCorrect) {
+      status = 'strong';
+      if (targetStepId === 'virendra-pressure-check') {
+        message = `FLAWLESS ARGUMENT! You present the certified WhatsApp screenshot showing the +44 VoIP country code, cite BNS Section 308 (Extortion), and successfully diagnose PRESSURE as the witness's state of mind. Justice G. Singh thunders: "Excellent! Under BNS Section 308, direct coercion and video-called threats completely negate voluntary consent. The signature on the declaration is empty and inadmissible! This bench accepts your argument, Counsel."`;
+      } else if (targetStepId === 'mishra-memory-check') {
+        message = `FLAWLESS ARGUMENT! You project the low-res pixelated CBI uniform logo, cite BSA Section 63 (Special Provisions for electronic evidence), and diagnose MEMORY ERROR. Justice G. Singh nods with approval: "Outstanding, Counsel! Under the extreme pressure of an active raid, Sub-Inspector Mishra reconstructed a physical gold seal from background expectations. The digital compression analysis proves the emblem was actually a pixel-painted overlay. The witness simply made an honest, stress-induced cognitive mistake. The objection is sustained!"`;
+      } else if (targetStepId === 'perjury-check') {
+        message = `FLAWLESS ARGUMENT! You present the Lucknow Times newspaper clipping, cite BNS Section 318 (Cheating by Personation), and diagnose active DECEPTION. Justice G. Singh slams his pen down: "Superb! The newspaper proves the Chief Justice of India was presiding in New Delhi Court Room 1, making any meeting with Amit Sen in Lucknow physically impossible. This is deliberate, calculated cyber-impersonation and perjury under BNS 318. Exceptionally presented, Counsel!"`;
+      } else if (targetStepId === 'dixit-procedural-check') {
+        message = `FLAWLESS ARGUMENT! You submit the Zero FIR receipt, cite BNSS Section 173 (Zero FIR), and diagnose PROCEDURAL CONFUSION. Justice G. Singh smiles: "A precise procedural strike, Counsel! Under BNSS 173, stations are legally mandated to register digital and cyber-crime complaints immediately, regardless of regional borders, under a Zero FIR protocol. Officer Dixit was stuck in outdated municipal geography habits. Perfect legal reasoning!"`;
+      } else {
+        message = `FLAWLESS ARGUMENT! You present the ${selectedItem.name}, cite the correct statutory code ${selectedLaw?.section}, and diagnose the witness reliability issue as ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} perfectly. Justice G. Singh thunders: "Indeed! Your logical formula is ironclad and fully accepted."`;
+      }
+    } else if (isReliabilityCorrect) {
+      status = 'partial';
+      message = `PARTIAL SUCCESS. You present the correct file and diagnose ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} correctly. However, you cited the WRONG statutory code (you selected ${selectedLaw ? selectedLaw.section : 'none'} instead of the controlling section for this matter)! Justice G. Singh adjusts his gold-rimmed spectacles: "Counsel, your psychological analysis is accurate, but your statutory citation is incorrect. Refer to the controlling codes under our new laws! I will sustain your factual point, but correct your formal brief before filing!"`;
+    } else if (isLawCorrect) {
+      status = 'partial';
+      message = `PARTIAL SUCCESS. You present the correct file and cite the controlling law (${selectedLaw?.section}) flawlessly. However, you misidentified the human reliability cause as ${selectedReliabilityKey.replace('_', ' ').toUpperCase()}! Justice G. Singh raises his hand: "Your statutory base is entirely correct, and the exhibit stands. But your human diagnosis is skewed. This witness does not exhibit ${selectedReliabilityKey.replace('_', ' ').toLowerCase()}; check your cognitive and psychological parameters! I will record the objection, but keep your arguments crisp!"`;
+    } else {
+      status = 'weak';
+      message = `WEAK ADJUDICATION! You present the correct exhibit, but cite the wrong statute (${selectedLaw ? selectedLaw.section : 'none'}) AND misclassify the reliability state as ${selectedReliabilityKey.replace('_', ' ').toUpperCase()}! Justice G. Singh sighs deeply: "This is a highly disorganized legal argument, Counsel. You happened to match the correct exhibit file, but your legal foundation and human diagnostics are completely misaligned. I will allow the fact to stand, but your standing with this bench is severely degraded!"`;
+    }
 
     // Save choice in game state
     setGameState(prev => {
@@ -289,8 +248,8 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     });
 
     setContradictionResult({
-      status: resolvedOutcome.status,
-      message: resolvedOutcome.message
+      status,
+      message
     });
   };
 
@@ -311,7 +270,6 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       setGameState(prev => ({
         ...prev,
         justiceScore: Math.min(100, prev.justiceScore + 12),
-        // Let the partial advance but keep a slight pressure setback
         pressureMeter: Math.min(100, prev.pressureMeter + 5)
       }));
     } else if (contradictionResult.status === 'weak') {
@@ -321,15 +279,14 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
       setGameState(prev => ({
         ...prev,
         justiceScore: Math.min(100, prev.justiceScore + 5),
-        // Let them proceed but increase pressure on poor forensic theory
         pressureMeter: Math.min(100, prev.pressureMeter + 12)
       }));
     } else {
       audioService.playGavel();
-      // Let them retry or correct, but they already took the pressure penalties in handleExecuteContradiction
       setContradictionResult({ status: null, message: '' });
       setSelectedContradictionId(null);
       setSelectedReliability(null);
+      setSelectedLawCardId(null);
     }
   };
 
@@ -709,9 +666,10 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                              <>
                                {/* Selector */}
                                <div className="space-y-4">
+                                  {/* Step 1: Select Forensic Exhibit */}
                                   <div className="space-y-2">
-                                     <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">1. Select Contradiction Exhibit Documentation</div>
-                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[160px] overflow-y-auto pr-1">
+                                     <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">1. Select Forensic Exhibit</div>
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[140px] overflow-y-auto pr-1">
                                         {gameState.inventory.map(item => {
                                            const isSelected = selectedContradictionId === item.id;
                                            const isAdmissible = GameEngine.isEvidenceAdmissible(item);
@@ -743,10 +701,37 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                      </div>
                                   </div>
 
+                                  {/* Step 2: Cite Sovereign Statutory Code */}
+                                  <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30">
+                                     <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
+                                        2. Cite Sovereign Statutory Code
+                                     </div>
+                                     <div className="grid grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
+                                        {LAW_CARDS.map(law => {
+                                           const isSelected = selectedLawCardId === law.id;
+                                           return (
+                                              <button
+                                                 key={law.id}
+                                                 onClick={() => setSelectedLawCardId(law.id)}
+                                                 className={`p-2 text-left border-2 transition-all relative flex flex-col justify-center cursor-pointer ${
+                                                    isSelected 
+                                                      ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)]'
+                                                      : 'bg-black/30 border-[#5A3D2D] hover:border-amber-900/60'
+                                                 }`}
+                                              >
+                                                 <span className="font-bold text-[9px] tracking-wider block text-amber-100">{law.section}</span>
+                                                 <span className="text-[7.5px] text-amber-100/60 block truncate">{law.title}</span>
+                                              </button>
+                                           );
+                                        })}
+                                     </div>
+                                  </div>
+
+                                  {/* Step 3: Evaluate Testimony Reliability Cause */}
                                   {trialStep.reliabilityReason && (
                                      <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30">
                                         <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-                                           2. Evaluate Testimony Reliability Cause
+                                           3. Evaluate Testimony Reliability Cause
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                            {[
@@ -777,10 +762,10 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                </div>
 
                                <button 
-                                   disabled={!selectedContradictionId || (!!trialStep.reliabilityReason && !selectedReliability)}
+                                   disabled={!selectedContradictionId || !selectedLawCardId || (!!trialStep.reliabilityReason && !selectedReliability)}
                                    onClick={handleExecuteContradiction}
                                    className={`w-full py-4 border-2 uppercase font-bold text-[10px] tracking-widest shadow-md transition-all cursor-pointer ${
-                                      selectedContradictionId && (!trialStep.reliabilityReason || selectedReliability)
+                                      selectedContradictionId && selectedLawCardId && (!trialStep.reliabilityReason || selectedReliability)
                                         ? 'bg-accent text-white border-accent hover:bg-black hover:text-white'
                                         : 'bg-[#180E0A] text-amber-100/20 border-amber-950/20 cursor-not-allowed'
                                    }`}
