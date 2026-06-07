@@ -34,7 +34,7 @@ export default function ReliabilityPanel({
     <div className="space-y-4 pt-3 border-t border-[#5A3D2D]/30">
       <div className="space-y-2">
         <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-          2. Evaluate Testimony Reliability Cause (Reliability Interpretation)
+          1. Evaluate Testimony Reliability (Reliability Interpretation)
         </div>
         <div className="grid grid-cols-2 gap-2">
           {reliabilityOptions.map(r => {

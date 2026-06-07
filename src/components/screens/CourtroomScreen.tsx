@@ -488,15 +488,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                               <>
                                {/* Selector */}
                                <div className="space-y-4">
-                                  {/* Step 1: Select Forensic Exhibit Component */}
-                                  <EvidencePanel
-                                    mode="modal-selector"
-                                    inventory={gameState.inventory}
-                                    selectedContradictionId={selectedContradictionId}
-                                    onSelect={setSelectedContradictionId}
-                                  />
-
-                                  {/* Step 2: Evaluate Testimony Reliability Component */}
+                                  {/* Step 1: Evaluate Testimony Reliability Component */}
                                   <ReliabilityPanel
                                     selectedReliability={selectedReliability}
                                     onSelect={setSelectedReliability}
@@ -505,6 +497,14 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                     onSelectJustification={setSelectedJustificationId}
                                     inventory={gameState.inventory}
                                     reliabilityReasonNeeded={!!trialStep.reliabilityReason}
+                                  />
+
+                                  {/* Step 2: Select Forensic Exhibit Component */}
+                                  <EvidencePanel
+                                    mode="modal-selector"
+                                    inventory={gameState.inventory}
+                                    selectedContradictionId={selectedContradictionId}
+                                    onSelect={setSelectedContradictionId}
                                   />
 
                                   {/* Step 3: Cite Sovereign Statutory Code */}

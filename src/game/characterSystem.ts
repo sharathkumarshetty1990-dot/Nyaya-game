@@ -25,10 +25,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `Counselor, let's get to the point. Is this certified under Section 63 or not? Yes or no... I am waiting.`;
-      }
-      if (pressure > 50) {
-        return `Counselor, state your admissibility ground clearly. We cannot spend all afternoon on...`;
+        return `How can the Court be certain of this exhibit's authenticity, Counselor? Under Section 63, is this certified or not?`;
       }
       return originalText;
     }
@@ -41,11 +38,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `I... I cannot... they said... ${originalText.substring(0, Math.min(originalText.length, 60))}... and then... I don't...`;
-      }
-      if (pressure > 50) {
-        const simplified = originalText.substring(0, Math.min(originalText.length, 110));
-        return `${simplified}... I... I couldn't...`;
+        return `I am not sure anymore. Everything happened so fast, and I was too terrified to check the details. I cannot be certain of the sequence.`;
       }
       return originalText;
     }
@@ -58,11 +51,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `Logs... on April 14... after... wait, no... at Lucknow...`;
-      }
-      if (pressure > 50) {
-        const simplified = originalText.substring(0, Math.min(originalText.length, 90));
-        return `${simplified}... we...`;
+        return `We logged the dispatch from Lucknow on April 14. Any apparent timezone or location discrepancy is likely just a network synchronization issue.`;
       }
       return originalText;
     }
@@ -75,10 +64,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `This is... we cannot base a criminal trial on unverified captures! I... I object to...`;
-      }
-      if (pressure > 50) {
-        return `Opposing counsel is guessing. Where is the actual, certified proof? This is...`;
+        return `This is highly speculative, Your Honor. Impeaching this position requires undeniable proof. This uncertified exhibit leaves too much room for uncertainty.`;
       }
       return originalText;
     }
