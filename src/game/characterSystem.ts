@@ -25,7 +25,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `How can the Court be certain of this exhibit's authenticity, Counselor? Under Section 63, is this certified or not?`;
+        return `Certified?`; // Authoritative, single-word demand under high tension
       }
       return originalText;
     }
@@ -38,7 +38,8 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `I am not sure anymore. Everything happened so fast, and I was too terrified to check the details. I cannot be certain of the sequence.`;
+        // Distorts the original text with hesitation, ellipsis, and uncertainty
+        return `They... they forced me to transfer... or was it? They said my daughter was in danger... I... I signed a declaration... on a video call... I think... but I can't be sure of the timestamp anymore...`;
       }
       return originalText;
     }
@@ -51,7 +52,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `We logged the dispatch from Lucknow on April 14. Any apparent timezone or location discrepancy is likely just a network synchronization issue.`;
+        return `System delay. Irrelevant. The Lucknow log is valid. Continue the transfer immediately.`; // Confident, simple, dismissive, scarier scammer
       }
       return originalText;
     }
@@ -64,7 +65,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `This is highly speculative, Your Honor. Impeaching this position requires undeniable proof. This uncertified exhibit leaves too much room for uncertainty.`;
+        return `Where... where is the certificate? This is just an uncertified screenshot... there is too much uncertainty...`; // Loses confidence under pressure
       }
       return originalText;
     }
