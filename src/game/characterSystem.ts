@@ -38,8 +38,8 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        // Distorts the original text with hesitation, ellipsis, and uncertainty
-        return `They... they forced me to transfer... or was it? They said my daughter was in danger... I... I signed a declaration... on a video call... I think... but I can't be sure of the timestamp anymore...`;
+        // Distorts the original text to reflect true uncertainty and fragile memory
+        return `The call came at 9:14. ... No. Wait. Maybe 9:11. I... I am not certain of the sequence anymore.`;
       }
       return originalText;
     }
@@ -65,7 +65,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `Where... where is the certificate? This is just an uncertified screenshot... there is too much uncertainty...`; // Loses confidence under pressure
+        return `Certificate. Now. This screenshot is uncertified hearsay under Section 63!`; // Aggressive, demanding
       }
       return originalText;
     }
