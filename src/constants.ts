@@ -58,9 +58,9 @@ export const EVIDENCE_POOL: Evidence[] = [
     authenticityRisk: 'Timestamp mismatch detected. Possible causes: Manual edits, timezone sync issues, or server cache discrepancy.',
     bsaSection: 'BSA 63',
     factualProperties: [
-      'Caller Identity Flag: Contains VoIP-spoofed country code prefix (+44 / UK)',
+      'Caller Identity Flag: Uses VoIP-spoofed country code prefix (+44 / UK)',
       'Timestamp: Recorded at 10:00 AM IST on April 14, 2026',
-      'Device Origin: Standard high-density frame buffer export matches victim\'s mobile hardware'
+      'Device Origin: Screenshot metadata matches the victim\'s phone model'
     ],
     factualThemes: ['cyber_communication_channel', 'spoofed_identity_vector', 'temporal_spatial_alignment']
   },
@@ -75,12 +75,12 @@ export const EVIDENCE_POOL: Evidence[] = [
     admissibilityStrength: 5,
     judgeImpact: 60,
     hasBSACertificate: false,
-    authenticityRisk: 'Compression block artifacts. Possible causes: Scam-group video tool compression, raw recording artifacts, or artificial pixel painting.',
+    authenticityRisk: 'Possible counterfeit. The badge appears digitally altered or low quality.',
     bsaSection: 'BSA 63',
     factualProperties: [
-      'Logo Geometry: Standard shape with non-uniform custom-drawn border lines',
-      'Color Profile: High-compression CMYK macro block layout instead of continuous embroidery thread tone',
-      'Origin Profile: Extracted directly from uncertified video stream codec blocks'
+      'Logo Geometry: The badge shape has irregular borders unlike real uniforms',
+      'Resolution: Logo is pixelated and lacks official embroidery patterns',
+      'Origin Profile: Extracted from a downloaded video recording'
     ],
     factualThemes: ['synthetic_imagery', 'spoofed_identity_vector']
   },
@@ -97,7 +97,7 @@ export const EVIDENCE_POOL: Evidence[] = [
     hasBSACertificate: false,
     factualProperties: [
       'Publication Date: April 14, 2026, morning edition',
-      'Physical Medium: Genuine low-acid lithographic web newsprint with CMYK rosettes',
+      'Physical Medium: Genuine newsprint stock with original ink saturation',
       'Factual Lead Text: Chief Justice G. Singh arrives at Supreme Court Room 1 in New Delhi at 11:00 AM IST for administrative dockets'
     ],
     factualThemes: ['physical_location_verification', 'temporal_spatial_alignment']

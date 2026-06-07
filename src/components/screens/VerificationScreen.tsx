@@ -42,61 +42,61 @@ const HYPOTHESES: Record<string, HypothesisOption[]> = {
   'wa-ss': [
     {
       id: 'wa-h1',
-      text: "The phone's internal clock automatically drifted backward from Lucknow NTP towers because the device was off for hours.",
+      text: "The phone's internal clock shifted because the device was turned off for a prolonged period.",
       isCorrect: false,
-      explanation: "Incorrect. Modern cellular devices synchronize with local cell carrier towers within microseconds. Drift errors are microscopic, not 5 hours 30 minutes exact integer steps."
+      explanation: "Incorrect. Modern smartphones sync automatically with local carrier clocks as soon as they receive any network signal. A manual 5 hour 30 minute shift is not standard drift."
     },
     {
       id: 'wa-h2',
-      text: "International proxy routing relay. Scammers used VoIP trunk lines with custom India (+91) spoof maps, but original metadata headers expose standard UTC (London/Europe) timestamps localization errors.",
+      text: "Spoofed virtual number timezone mismatch. The metadata shows a timezone conflict between the caller's virtual number (+44 UK) and the local Indian time, exposing an international VoIP setup.",
       isCorrect: true,
-      explanation: "Outstanding Deduction! A classic 'Digital Arrest' calling mechanism using virtual VoIP trunk lines. While the display mask shows +91 coordinates, the original file-packets are GMT-registered."
+      explanation: "Outstanding Deduction! A classic 'Digital Arrest' calling mechanism where scammers use virtual VoIP lines. While the display mask mimics a local caller, the underlying session metadata reveals the overseas timezone mismatch."
     },
     {
       id: 'wa-h3',
-      text: "Virendra Sharma manually changed his phone clock to GMT to support an alibi for his digital transaction timeline.",
+      text: "Virendra Sharma manually changed his phone clock to support an alibi for his digital transaction timeline.",
       isCorrect: false,
-      explanation: "Incorrect. Third-party central banking logs verify the liquid transfer was initiated from Sharma's local bank IP concurrently at 10:30 AM IST. Sharma is logically and factually a victim."
+      explanation: "Incorrect. Bank records verify the active transfer occurred at 10:30 AM IST. Sharma is logically and factually a victim of coercion, not a collaborator."
     }
   ],
   'cbi-logo': [
     {
       id: 'cbi-h1',
-      text: "Normal camera sensor distortion. Uniform khakhi threads warped the lens's organic focus field, creating a jagged edge.",
+      text: "Normal camera distortion. Poor camera resolution and fabric folds warped the edges of the logo naturally.",
       isCorrect: false,
-      explanation: "Incorrect. Sensor focus and blur fields are mathematically progressive. Sudden rectangular vector shifts and pixel boundary isolation filters confirm synthetic overlay borders."
+      explanation: "Incorrect. Natural fabric creases produce progressive, organic warping. Perfectly sharp, straight pixel boundaries prove a digital overlay."
     },
     {
       id: 'cbi-h2',
-      text: "Synthesized pixel overlay overlay. Spectral analysis maps isolated pixel groupings where a high-resolution digital CBI logo was superimposed onto generic khakhi cloth, proving physical fraud.",
+      text: "Superimposed digital logo. Close-up inspection shows perfectly straight, sharp digital borders that clash directly with the coarse, woven fabric of the uniform.",
       isCorrect: true,
-      explanation: "Brilliant analysis! High-frequency filters reveal a perfect boundary line where the pixels do not match the low-grain organic fabric texture. The uniform was completely simulated."
+      explanation: "Brilliant analysis! Real badges are stitched on or stamped, resulting in slightly irregular, textured edges. A pixel-perfect, straight border confirms the badge was digitally added onto the image."
     },
     {
       id: 'cbi-h3',
-      text: "Camera lens dust landing exactly on the uniform boundary during the suspect's move, causing microburst shadows.",
+      text: "Camera lens dust or smudge creating linear artifacts that mimic sharp boundaries.",
       isCorrect: false,
-      explanation: "Incorrect. Dust particles disperse randomly, creating soft-edge shadows. They never follow exact 90-degree synthetic resolution angles."
+      explanation: "Incorrect. Lens smudges create soft, blurry shadows. They do not generate crisp, straight geometric boxes around a badge."
     }
   ],
   'newspaper-cji': [
     {
       id: 'news-h1',
-      text: "Genuine high-acid paper offsets. Microscopically resolved cyan/yellow CMYK rosettes and hollow ink diffusion patterns match physical newspaper print, verifying raw April 14th daily authenticity.",
+      text: "Genuine print ink absorption. Physical paper fiber examination shows the print ink successfully absorbed deeply into the wood-pulp paper, matching real April 14th daily editions.",
       isCorrect: true,
-      explanation: "Excellent check! Genuine newspapers of high acid-index use high-pressure roller offset ink which displays capillary tooth bleed under microscopic resolution. This proves physical daily origin on April 14th."
+      explanation: "Excellent check! Real industrial newspapers are printed with wet ink that bleeds slightly into the paper fibers (feathering). This matches authentic press-print runs from April 14th rather than clean laser toner."
     },
     {
       id: 'news-h2',
-      text: "A highly complex offices spoof printed yesterday on standard office copy laser machines, mimicking traditional rosettes.",
+      text: "A high-resolution laser print copy on standard office paper.",
       isCorrect: false,
-      explanation: "Incorrect. High-resolution laser printers fuse micro-toner plastic powder onto paper at extreme heat, yielding perfectly round ink droplets with zero paper-tooth wood-pulp seeping."
+      explanation: "Incorrect. Laser printers melt dry toner on top of the paper surface, leaving a raised, shiny plastic layer rather than absorbing into the paper fibers."
     },
     {
       id: 'news-h3',
-      text: "An ink-jet replica using water-based inks that naturally diffused across high-grade photo quality satin paper.",
+      text: "An inkjet color copy using standard photo-quality paper.",
       isCorrect: false,
-      explanation: "Incorrect. Inkjet printers spray mist nozzles resulting in high saturation blotches, lacking the rigid honeycomb rosette pattern typical of physical news presses."
+      explanation: "Incorrect. Inkjet printers spray micro-droplets of water-based ink which cause high-saturation pooling on photo papers, lacking the dry newsprint fiber penetration is standard press-print."
     }
   ]
 };
@@ -318,7 +318,7 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
     // Since both order AND mapped evidence are 100% correct
     setTimelineSolved(true);
     audioService.playSuccess();
-    setTimelineFeedback("COHERENT FORENSIC TIMELINE RECONSTRUCTED SUCCESSFUL! Outstanding detective work! By correctly sequencing the events and tying your scientific exhibits directly to the claims, you have established the 'Temporal Impossibility'. Inspector Amit Sen claimed he was present in Lucknow at 10:45 AM, but your Daily print clipping proves the CJI was presiding in Delhi SC-Room 1 at 11:00 AM, making a Lucknow alibi physically preposterous. Your entire digital dockets are legally certified as 100% authentic and admitted under BSA Sec 63!");
+    setTimelineFeedback("TIMELINE RECONSTRUCTION SUCCESSFUL! Excellent work! By sequencing the events and tying your exhibits to the disputed timeline, you have established a clear temporal impossibility. The caller claimed he was present in Lucknow at 10:45 AM, but your newspaper clipping proves the Chief Justice was presiding in New Delhi at 11:00 AM, making the claimant's Lucknow locations physically impossible. Your digital exhibits are authenticated and certified under BSA Section 63!");
     
     // Auto-certify all DIGITAL evidence in inventory as a major prize!
     setGameState(prev => ({
@@ -410,27 +410,27 @@ export default function VerificationScreen({ gameState, setGameState }: Verifica
                           const isVer = selectedEvidence.authenticity === AuthenticityStatus.VERIFIED;
                           const isAdm = selectedEvidence.hasBSACertificate;
                           let pillars = [
-                            { label: "Metadata Aligned Verified", checked: isVer, detail: "Original server packet origin" },
+                            { label: "Metadata Authenticity Verified", checked: isVer, detail: "Clock and location details verified" },
                             { label: "Witness Corroborated Verified", checked: isVer, detail: "Oral testimony cross-checked" },
-                            { label: "Sec. 63 custody chain intact", checked: isAdm, detail: "Electronic seal generated" }
+                            { label: "Sec. 63 Custody Chain Sealed", checked: isAdm, detail: "Certificate of authenticity verified" }
                           ];
                           if (selectedEvidence.id === 'wa-ss') {
                              pillars = [
-                               { label: "EXIF Timestamp Offset Extracted", checked: isVer, detail: "UTC shift shows spoofed local call" },
-                               { label: "VoIP Trunk Route Corroborated", checked: isVer, detail: "Identified custom spoof maps" },
-                               { label: "Sec. 63 Custody Chain Intact", checked: isAdm, detail: "Electronic custody chain sealed" }
+                               { label: "Screenshot Timestamp Verified", checked: isVer, detail: "Exposes calling time discrepancy" },
+                               { label: "VoIP Spoof Mismatch Proven", checked: isVer, detail: "Identified timezone conflict with calling origin" },
+                               { label: "Sec. 63 Custody Chain Sealed", checked: isAdm, detail: "Certificate of authenticity verified" }
                              ];
                           } else if (selectedEvidence.id === 'cbi-logo') {
                              pillars = [
-                               { label: "Overlay Boundary Gradient Isolated", checked: isVer, detail: "Synthetic edge structures highlighted" },
-                               { label: "Spectral Textile Density Corroborated", checked: isVer, detail: "Lack of physical stamp confirmed" },
-                               { label: "Sec. 63 Custody Chain Intact", checked: isAdm, detail: "Electronic custody chain sealed" }
+                               { label: "Overlay Boundary Check Passed", checked: isVer, detail: "Isolated sharp artificial border edges" },
+                               { label: "Uniform Fabric Pattern Checked", checked: isVer, detail: "Contrast between stitching and logo proved overlay" },
+                               { label: "Sec. 63 Custody Chain Sealed", checked: isAdm, detail: "Certificate of authenticity verified" }
                              ];
                           } else if (selectedEvidence.id === 'newspaper-cji') {
                              pillars = [
-                               { label: "Lithographic Rosettes Resolved", checked: isVer, detail: "CMYK micro-dot matrices parsed" },
-                               { label: "CJI Temporal Alibi Corroborated", checked: isVer, detail: "Daily print location validated" },
-                               { label: "Sec. 63 Custody Chain Intact", checked: isAdm, detail: "Electronic custody chain sealed" }
+                               { label: "Ink Saturation Verified", checked: isVer, detail: "Paper ink absorption matching press print" },
+                               { label: "CJI Location Alibi Corroborated", checked: isVer, detail: "Daily print location schedule validated" },
+                               { label: "Sec. 63 Custody Chain Sealed", checked: isAdm, detail: "Certificate of authenticity verified" }
                              ];
                           }
                           return pillars.map((p, pIdx) => (

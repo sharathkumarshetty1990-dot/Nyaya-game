@@ -1,5 +1,59 @@
 import { Evidence, AuthenticityStatus, AdmissibilityStatus, GameState } from '../types';
 
+interface EvaluationRule {
+  themeTrigger?: string;
+  propertyKeyTriggers?: string[];
+  score: number;
+  message: string;
+}
+
+const INTEGRITY_RULES: EvaluationRule[] = [
+  {
+    themeTrigger: 'synthetic_imagery',
+    score: 10,
+    message: "✗ Forensic Discrepancy: Sharp, perfectly straight digital edges indicate the badge was superimposed (counterfeit uniform)."
+  },
+  {
+    propertyKeyTriggers: ['Device Origin', 'Screenshot metadata', 'phone model'],
+    score: 35,
+    message: "✓ Forensic Signature: Screenshot metadata matches the victim's phone hardware and original file details."
+  },
+  {
+    propertyKeyTriggers: ['Physical Medium', 'newsprint', 'paper texture'],
+    score: 35,
+    message: "✓ Material Integrity: Physical newsprint paper texture and print ink match authentic newspaper stock."
+  },
+  {
+    propertyKeyTriggers: ['Station Coordinates', 'police stamp', 'seal', 'signature stamp'],
+    score: 35,
+    message: "✓ Authenticity Signature: Hazratganj station seal and officer signature are authentic and verified."
+  }
+];
+
+const TIMELINE_RULES: EvaluationRule[] = [
+  {
+    themeTrigger: 'spoofed_identity_vector',
+    propertyKeyTriggers: ['Uses VoIP-spoofed', 'VoIP-spoofed', '+44'],
+    score: 15,
+    message: "✗ Spatiotemporal Gap: The +44 UK calling prefix on the virtual account indicates country-code spoofing."
+  },
+  {
+    themeTrigger: 'synthetic_imagery',
+    score: 15,
+    message: "✗ Temporal Discrepancy: Extracted from an unverified third-party video recording stream."
+  },
+  {
+    themeTrigger: 'physical_location_verification',
+    score: 35,
+    message: "✓ Temporal Coherence: Published arrival time matches the official New Delhi administrative schedule."
+  },
+  {
+    themeTrigger: 'jurisdiction_bypass',
+    score: 35,
+    message: "✓ Procedural Alignment: Complaint logged or verified under Zero FIR guidelines."
+  }
+];
+
 /**
  * Structural Factors - Causes -> Score Derivation Model
  * Computes deep qualitative pillars based on empirical facts & inventory context,
@@ -15,36 +69,38 @@ export const deriveCredibilityState = (
   let admissibilityStrengthRating = 15; // base level for unverified/uncertified items
 
   // 1. Forensic & Material Integrity Pillar (Weight: 35)
-  if (evidence.id === 'wa-ss') {
-    causes.push("✓ Forensic Signature: High-density frame buffer export matches native mobile hardware profile.");
-    credibilityRating += 35;
-  } else if (evidence.id === 'newspaper-cji') {
-    causes.push("✓ Material Integrity: Lithographic print rosettes and low-acid paper verify physical authenticity.");
-    credibilityRating += 35;
-  } else if (evidence.id === 'zero-fir-receipt') {
-    causes.push("✓ Authenticity Signature: Official Hazratganj station seal is legally authentic and catalogued.");
-    credibilityRating += 35;
-  } else if (evidence.id === 'cbi-logo') {
-    causes.push("✗ Forensic Discrepancy: Geometric scans show non-uniform borders & synthetic micro-pixel painting (proven counterfeit).");
-    credibilityRating += 10; // Capped due to being an artificial scam element
+  const integrityMatch = INTEGRITY_RULES.find(rule => {
+    const themeMatches = rule.themeTrigger && evidence.factualThemes?.includes(rule.themeTrigger);
+    const propMatches = rule.propertyKeyTriggers && evidence.factualProperties?.some(prop => 
+      rule.propertyKeyTriggers?.some(trigger => prop.toLowerCase().includes(trigger.toLowerCase()))
+    );
+    return themeMatches || propMatches;
+  });
+
+  if (integrityMatch) {
+    causes.push(integrityMatch.message);
+    credibilityRating += integrityMatch.score;
   } else {
-    causes.push("✓ Forensic Signature: Standard capture characteristics verify physical/digital coherence.");
+    causes.push("✓ Forensic Signature: Basic capture metadata verified.");
     credibilityRating += 30;
   }
 
   // 2. Spatiotemporal Timeline Coherence Pillar (Weight: 35)
-  if (evidence.id === 'wa-ss') {
-    causes.push("✗ Spatiotemporal Gap: Country code prefix mismatch (+44 UK) and routing delay indicate timezone spoofing.");
-    credibilityRating += 15;
-  } else if (evidence.id === 'newspaper-cji') {
-    causes.push("✓ Temporal Coherence: Published date/time matches the 11:00 AM slot of CJI's New Delhi whereabouts exactly.");
-    credibilityRating += 35;
-  } else if (evidence.id === 'zero-fir-receipt') {
-    causes.push("✓ Procedural Alignment: Zero FIR entry logged instantly under BNSS Section 173 mandate.");
-    credibilityRating += 35;
-  } else if (evidence.id === 'cbi-logo') {
-    causes.push("✗ Temporal Discrepancy: Extracted from unverified live video stream compression block layers.");
-    credibilityRating += 15;
+  const timelineMatch = TIMELINE_RULES.find(rule => {
+    const themeMatches = rule.themeTrigger && evidence.factualThemes?.includes(rule.themeTrigger);
+    const propMatches = rule.propertyKeyTriggers && evidence.factualProperties?.some(prop => 
+      rule.propertyKeyTriggers?.some(trigger => prop.toLowerCase().includes(trigger.toLowerCase()))
+    );
+    
+    if (rule.themeTrigger && rule.propertyKeyTriggers) {
+      return themeMatches && propMatches;
+    }
+    return themeMatches || propMatches;
+  });
+
+  if (timelineMatch) {
+    causes.push(timelineMatch.message);
+    credibilityRating += timelineMatch.score;
   } else {
     causes.push("✓ Timeline Coherent: Temporal events match contextual trial history.");
     credibilityRating += 30;
@@ -67,11 +123,11 @@ export const deriveCredibilityState = (
 
   // 4. Custody Chain Integrity (BSA Section 63 Certification State)
   if (evidence.hasBSACertificate) {
-    causes.push("✓ Custody Seal: Vault custody chain sealed with double-signature hash verified under BSA Sec 63.");
+    causes.push("✓ Custody Seal: Digital certificate of authenticity signed and verified under BSA Section 63.");
     admissibilityStrengthRating = 95; // High admissibility strength on certification
     credibilityRating += 15;
   } else {
-    causes.push("✗ Custody Unsealed: Chain of custody is uncertified under statutory BSA Section 63 forensic rules.");
+    causes.push("✗ Custody Unsealed: Digital evidence lacks the required certification under BSA Section 63.");
     if (evidence.authenticity === AuthenticityStatus.VERIFIED) {
       admissibilityStrengthRating = 45; // Moderately stronger once verified
     }

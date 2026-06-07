@@ -25,10 +25,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `[Bench Memorandum Review] ${originalText} This court requires precise chronological and statutory consistency. Any procedural or forensic ambiguity under Section 63 must be addressed before this exhibit can be formally admitted.`;
+        return `Counselor, let's get to the point. Is this certified under Section 63 or not? Yes or no... I am waiting.`;
       }
       if (pressure > 50) {
-        return `Counselor, let us preserve procedural protocol. ${originalText} We must restrict our focus strictly to certified, legally admissible entries.`;
+        return `Counselor, state your admissibility ground clearly. We cannot spend all afternoon on...`;
       }
       return originalText;
     }
@@ -41,15 +41,11 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        const distorted = originalText
-          .replace(/immediately/g, "at some point... or perhaps later... I cannot confirm")
-          .replace(/fully/g, "partially... or maybe fully")
-          .replace(/\. /g, "... I think. ... ");
-        return `${distorted} ...the exact sequence of events is becoming difficult to isolate. There were multiple concurrent calls... was my pension targeted first, or did the federal claims happen prior?`;
+        return `I... I cannot... they said... ${originalText.substring(0, Math.min(originalText.length, 60))}... and then... I don't...`;
       }
       if (pressure > 50) {
-        const distorted = originalText.replace(/\. /g, "... if my memory serves me correctly... ");
-        return `${distorted} ...there was high cognitive load during that hour. Is there any objective digital log to confirm that part?`;
+        const simplified = originalText.substring(0, Math.min(originalText.length, 110));
+        return `${simplified}... I... I couldn't...`;
       }
       return originalText;
     }
@@ -62,10 +58,11 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `[LATENCY DEVIATION SIGNALET] ${originalText} [FORENSIC METADATA: Source trunk identifies as international gateway +44; subscriber profile unverified].`;
+        return `Logs... on April 14... after... wait, no... at Lucknow...`;
       }
       if (pressure > 50) {
-        return `[TRANSMISSION ARTIFACTS] ${originalText} [FORENSIC METADATA: Local timezone offset mismatch detected].`;
+        const simplified = originalText.substring(0, Math.min(originalText.length, 90));
+        return `${simplified}... we...`;
       }
       return originalText;
     }
@@ -78,10 +75,10 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 50,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `We object to this reading! ${originalText} The prosecution's timeline contains clear, unaccounted chronological lapses. To rely on this would be a major procedural misstep!`;
+        return `This is... we cannot base a criminal trial on unverified captures! I... I object to...`;
       }
       if (pressure > 50) {
-        return `A highly tenuous connection, Counsel. ${originalText} Where is the verifiable, dual-signature hash to support this timeline?`;
+        return `Opposing counsel is guessing. Where is the actual, certified proof? This is...`;
       }
       return originalText;
     }
