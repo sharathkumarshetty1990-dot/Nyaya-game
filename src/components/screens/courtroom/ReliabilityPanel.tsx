@@ -9,6 +9,7 @@ interface ReliabilityPanelProps {
   onSelectJustification: (id: string) => void;
   inventory: Evidence[];
   reliabilityReasonNeeded: boolean;
+  pressureMeter?: number;
 }
 
 export default function ReliabilityPanel({
@@ -18,7 +19,8 @@ export default function ReliabilityPanel({
   selectedJustificationId,
   onSelectJustification,
   inventory,
-  reliabilityReasonNeeded
+  reliabilityReasonNeeded,
+  pressureMeter
 }: ReliabilityPanelProps) {
   
   if (!reliabilityReasonNeeded) return null;
@@ -109,43 +111,44 @@ export default function ReliabilityPanel({
               let synthesisText = "";
               let isExactChain = false;
 
+              const isHighPressure = pressureMeter !== undefined && pressureMeter > 65;
               const mainName = mainItem ? mainItem.name : "[Select Primary Forensic Exhibit in Step 2]";
 
               if (selectedContradictionId === 'wa-ss' && selectedReliability === 'pressure') {
                 if (selectedJustificationId === 'cbi-logo') {
                   isExactChain = true;
-                  synthesisText = `The WhatsApp screenshot (${mainItem?.name}) provides primary proof of coercion (BNS Sec 308). This pressure is heavily corroborated by the counterfeit CBI logo analysis (${justificationItem?.name}), establishing that the threat actors deployed high-grade synthetic federal authority (impersonation badges) to completely hijack and override the schoolmaster's voluntary agency.`;
+                  synthesisText = `The WhatsApp screenshot (${mainItem?.name}) shows direct coercion under BNS Section 308. This pressure is corroborated by the fake CBI logo (${justificationItem?.name}), proving the scammers used forged federal credentials to terrify Virendra and force his compliance.`;
                 } else if (selectedJustificationId) {
-                  synthesisText = `The WhatsApp screenshot (${mainItem?.name}) shows digital threats. However, utilizing ${justificationItem?.name} as justification fails to map the psychological weapon of false federal authority that overpowered the counselor under BNS 308.`;
+                  synthesisText = `The WhatsApp screenshot (${mainItem?.name}) shows digital threats. However, using ${justificationItem?.name} as justification does not help prove how fake federal authority was used to coerce him under BNS Section 308.`;
                 } else {
-                  synthesisText = `Select a corroborating justification exhibit to complete the legal reasoning chain for high-pressure extortion.`;
+                  synthesisText = `Select a supporting exhibit to complete the coercion argument under BNS Section 308.`;
                 }
               } else if (selectedContradictionId === 'cbi-logo' && selectedReliability === 'memory_error') {
                 if (selectedJustificationId === 'wa-ss') {
                   isExactChain = true;
-                  synthesisText = `Sub-Inspector Mishra's memory of recovering a physical 'gold seal stamp' with this logo is discredited by the CBI logo analysis (${mainItem?.name}). This memory error is corroborated by the virtual environment of the WhatsApp screenshot (${justificationItem?.name}), proving the entire threat cycle was executed over a digital-only channel—causing cognitive source-monitoring error during the high-stress raid.`;
+                  synthesisText = `Sub-Inspector Mishra's memory of finding a physical 'gold seal stamp' is disproved by the fake CBI logo (${mainItem?.name}). This mistake is corroborated by the digital WhatsApp screenshot (${justificationItem?.name}), showing that Mishra mistook a digital overlay seen in phone screenshots for an actual physical stamp during the high-stress raid.`;
                 } else if (selectedJustificationId) {
-                  synthesisText = `The CBI logo analysis (${mainItem?.name}) proves the physical crest is synthetic. However, citing ${justificationItem?.name} as justification does not establish the virtual interaction context (WhatsApp execution) that triggered the SI's memory reconstruction error.`;
+                  synthesisText = `The CBI logo analysis (${mainItem?.name}) proves the physical crest never existed. However, using ${justificationItem?.name} as justification does not explain why the officer mistakenly remembered it as a physical stamp.`;
                 } else {
-                  synthesisText = `Select a corroborating justification exhibit to explain the officer's visual memory error.`;
+                  synthesisText = `Select a supporting exhibit to explain the officer's memory error.`;
                 }
               } else if (selectedContradictionId === 'newspaper-cji' && selectedReliability === 'deception') {
                 if (selectedJustificationId === 'wa-ss') {
                   isExactChain = true;
-                  synthesisText = `The Daily Newspaper report (${mainItem?.name}) proves Chief Justice G. Singh was presiding in Supreme Court Room 1 in New Delhi. This directly falsifies the CBI poser threat logs (${justificationItem?.name}) asserting Lucknow barracks custody warrant meetings, establishing deliberate, coordinated perjury and deception (BNS Sec 318).`;
+                  synthesisText = `The newspaper report (${mainItem?.name}) proves the Chief Justice was in Delhi, not Lucknow. This directly disproves the CBI logs (${justificationItem?.name}) claiming a barracks custody meeting in Lucknow, establishing a deliberate lie and perjury under BNS Section 318.`;
                 } else if (selectedJustificationId) {
-                  synthesisText = `The Newspaper report (${mainItem?.name}) places the CJI in Delhi. However, to construct a complete perjury argument, this must be explicitly cross-referenced with the digital call logs and threat transcripts (${justificationItem?.name}) that carried the false alibi statements.`;
+                  synthesisText = `The newspaper report (${mainItem?.name}) places the CJI in Delhi. To expose a deliberate lie, you must match this proof with the digital statements and logs (${justificationItem?.name}) that carried the fake Lucknow alibi.`;
                 } else {
-                  synthesisText = `Select the primary call transcript or threat context as a corroborating exhibit to expose perjury.`;
+                  synthesisText = `Select a supporting exhibit to expose the perjury.`;
                 }
               } else if (selectedContradictionId === 'zero-fir-receipt' && selectedReliability === 'procedural_confusion') {
                 if (selectedJustificationId === 'wa-ss') {
                   isExactChain = true;
-                  synthesisText = `The Zero FIR receipt (${mainItem?.name}) proves legal compliance under BNSS Section 173. Citing the WhatsApp screenshot (${justificationItem?.name}) as corroborative support proves that the crime was purely electronic, which by supreme statute overrides all regional police jurisdiction codes and physical territory locks.`;
+                  synthesisText = `The Zero FIR receipt (${mainItem?.name}) proves legal compliance under BNSS Section 173. Citing the WhatsApp screenshot (${justificationItem?.name}) as support proves the crime was purely online, which overrides physical district limits and regional borders.`;
                 } else if (selectedJustificationId) {
-                  synthesisText = `The Zero FIR receipt (${mainItem?.name}) validates swift procedure. However, to rule Hazratganj's territorial boundary refusal void, you must corroborate the procedural confusion with direct proof of the electronic nature (${justificationItem?.name}) of the crime.`;
+                  synthesisText = `The Zero FIR receipt (${mainItem?.name}) validates swift procedure. However, to override geographical borders, you must support this with direct proof of the electronic nature (${justificationItem?.name}) of the crime.`;
                 } else {
-                  synthesisText = `Select a corroborating justification exhibit to override physical territorial boundaries.`;
+                  synthesisText = `Select a supporting exhibit to override physical boundaries.`;
                 }
               } else {
                 synthesisText = `Diagnosing ${rName} with ${mainName}. ${justificationItem ? `Corroborating factor linked via ${justificationItem.name}.` : 'Choose a corroborating exhibit to complete your statement.'}`;
@@ -154,17 +157,23 @@ export default function ReliabilityPanel({
               return (
                 <>
                   <p className="leading-snug text-[10.5px] font-sans text-amber-100/90">{synthesisText}</p>
-                  <p className={`text-[8.5px] mt-2 p-1.5 border font-mono flex items-center gap-1.5 ${
-                    isExactChain 
-                      ? 'bg-emerald-950/20 text-[#6FCF97] border-[#6FCF97]/20' 
-                      : 'bg-[#1A0D08] text-amber-500 border-amber-950/40'
-                  }`}>
-                    {isExactChain ? (
-                      <>⚖️ LEGAL REASONING COHERENT (Double-Link chain formed!)</>
-                    ) : (
-                      <>⚖️ LOGICAL JUSTIFICATION: Pending complete legal reasoning chain...</>
-                    )}
-                  </p>
+                  {isHighPressure ? (
+                    <p className="text-[8.5px] mt-2 p-1.5 border font-mono flex items-center gap-1.5 bg-[#20100B] text-amber-500/60 border-amber-950/40 italic">
+                      ⚖️ HIGH PRESSURE: Verification previews are suppressed under bench scrutiny. Trust your theory.
+                    </p>
+                  ) : (
+                    <p className={`text-[8.5px] mt-2 p-1.5 border font-mono flex items-center gap-1.5 ${
+                      isExactChain 
+                        ? 'bg-emerald-950/20 text-[#6FCF97] border-[#6FCF97]/20' 
+                        : 'bg-[#1A0D08] text-amber-500 border-amber-950/40'
+                    }`}>
+                      {isExactChain ? (
+                        <>⚖️ LEGAL REASONING COHERENT (Double-Link chain formed!)</>
+                      ) : (
+                        <>⚖️ LOGICAL JUSTIFICATION: Pending complete legal reasoning chain...</>
+                      )}
+                    </p>
+                  )}
                 </>
               );
             })()}

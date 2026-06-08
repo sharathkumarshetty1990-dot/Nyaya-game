@@ -261,28 +261,28 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
     if (isLawCorrect && isReliabilityCorrect && isJustificationCorrect) {
       status = 'strong';
       if (targetStepId === 'virendra-pressure-check') {
-        message = `ADMISSIBLE. Under BNS Section 308, direct coercion and video-called threats completely negate voluntary consent. Presenting the certified WhatsApp screenshot, supported by the counterfeit logo proving cyber-spoofing, forms an ironclad evidentiary chain. Coerced declaration ruled void!`;
+        message = `Admitted. Under BNS Section 308, threats on a video call completely void any voluntary consent. The certified WhatsApp screenshot, backed up by the fake CBI logo proving identity spoofing, proves Virendra was coerced. The coerced statement cannot stand.`;
       } else if (targetStepId === 'mishra-memory-check') {
-        message = `SUSTAINED. Under BSA Section 63, electronic structure analysis proves the CBI logo was a synthetic overlay. Citing the electronic WhatsApp environment as corroboration proves the officer suffered a classical cognitive source-monitoring memory error. No physical stamp existed.`;
+        message = `Sustained. Under BSA Section 63, the logo is a fake digital overlay, not a real physical seal. Mishra's memory of seeing a gold seal stamp is simply a mistake, caused by the high-stress raid. The physical stamp never existed.`;
       } else if (targetStepId === 'perjury-check') {
-        message = `DECEPTION CONFIRMED. Under BNS 318, the alibi is perjury. Official newspaper reports place the CJI in Delhi, while the spoofed call logs assert Lucknow presence. This dual-link mapping proves malicious fraud.`;
+        message = `Deception confirmed. Under BNS Section 318, the alibi is false. Official newspaper reports place the Chief Justice in Delhi, while the spoofed call logs claim a meeting in Lucknow. This proves a deliberate lie.`;
       } else if (targetStepId === 'dixit-procedural-check') {
-        message = `PROCEDURAL BYPASS ADOPTED. Under BNSS Section 173, Zero FIR registration is mandatory for digital crimes. Linking the WhatsApp transaction proves the crime occurred over the internet—overriding Hazratganj's spatial limits.`;
+        message = `Zero FIR accepted. Under BNSS Section 173, a Zero FIR is mandatory for digital crimes. Because the crime was committed online via WhatsApp, regional borders don't apply. Hazratganj station can't refuse it.`;
       } else {
-        message = `FLAWLESS LEGAL REASONING. Exhibit ${selectedItem.name} admitted under ${selectedLaw?.section} with correct reliability diagnosis of ${selectedReliabilityKey.toUpperCase()} and coherent corroborating grounds.`;
+        message = `Correct legal theory. Exhibit ${selectedItem.name} is admitted under ${selectedLaw?.section}. Your diagnosis of ${selectedReliabilityKey.toUpperCase()} is accurate and supported by your second exhibit.`;
       }
     } else if (isLawCorrect && isReliabilityCorrect && !isJustificationCorrect) {
       status = 'partial';
-      message = `PARTIAL REASONING. Your diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} and statutory citation of ${selectedLaw?.section} are textually correct. However, you selected an incorrect corroborating justification exhibit. The defense counselor argues your causal link remains legally ungrounded!`;
+      message = `Partial reasoning. Your diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} and use of ${selectedLaw?.section} are correct. However, the supporting exhibit you linked doesn't actually back up this specific theory. The defense counselor argues your point lacks grounding.`;
     } else if (isReliabilityCorrect) {
       status = 'partial';
-      message = `PARTIAL COMPLIANCE. Reliability diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} is factually correct. However, the cited statute (${selectedLaw ? selectedLaw.section : 'none'}) is legally incorrect. Brief sustained on facts but marked with a statutory penalty.`;
+      message = `Partial compliance. Your diagnosis of ${selectedReliabilityKey.replace('_', ' ').toUpperCase()} is correct on the facts, but you cited the wrong statute (${selectedLaw ? selectedLaw.section : 'none'}). The judge accepts the facts but notes the legal error.`;
     } else if (isLawCorrect) {
       status = 'partial';
-      message = `PARTIAL COMPLIANCE. Statutory citation of ${selectedLaw?.section} is correct, admitting the exhibit. However, the diagnosed reliability cause (${selectedReliabilityKey.replace('_', ' ').toUpperCase()}) is theoretically incorrect. Fact admitted but legal standing penalized.`;
+      message = `Partial compliance. Your statutory citation of ${selectedLaw?.section} is correct, so the exhibit is admitted, but your theory on why the witness is unreliable (${selectedReliabilityKey.replace('_', ' ').toUpperCase()}) is incorrect.`;
     } else {
       status = 'weak';
-      message = `WEAK ADJUDICATION. Primary exhibit matched, but statutory selection, reliability diagnosis, or justifying corroboration are incorrect. Re-evaluate your legal chain.`;
+      message = `Weak argument. You found the right primary exhibit, but your reason, your statutory citation, or your supporting evidence is incorrect. Re-evaluate your theory.`;
     }
 
     // Save choice in game state
@@ -497,6 +497,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                     onSelectJustification={setSelectedJustificationId}
                                     inventory={gameState.inventory}
                                     reliabilityReasonNeeded={!!trialStep.reliabilityReason}
+                                    pressureMeter={gameState.pressureMeter}
                                   />
 
                                   {/* Step 2: Select Forensic Exhibit Component */}

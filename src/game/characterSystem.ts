@@ -37,10 +37,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     baseBehavior: 'Earnest, vulnerable, highly formal, deeply traumatized by the scam.',
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
-      if (pressure > 75) {
-        // Preserves the original testimony (facts remain stable) but leaves natural silence and pauses to speak for itself
-        return `${originalText} ...`;
-      }
+      // Witness dialogue remains fully stable under pressure; ambiguity is resolved via gameplay and evidence
       return originalText;
     }
   },
@@ -51,10 +48,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     baseBehavior: 'Authoritative, imposing, using psychological coercion tactics.',
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
-      if (pressure > 75) {
-        // Create investigative ambiguity (avoiding over-explaining with system delays)
-        return `The record is valid. Continue.`;
-      }
+      // Witness transcripts remain fully stable under pressure; ambiguity is resolved via gameplay and evidence
       return originalText;
     }
   },
