@@ -58,7 +58,7 @@ export default function ReliabilityPanel({
         </div>
       </div>
 
-      {selectedContradictionId && selectedReliability && (
+      {selectedReliability && (
         <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30 animate-fadeIn">
           <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
             2.1 Link Corroborating Evidence (Validate Theory)
@@ -68,7 +68,7 @@ export default function ReliabilityPanel({
           </p>
           <div className="grid grid-cols-3 gap-2">
             {inventory
-              .filter(item => item.id !== selectedContradictionId)
+              .filter(item => !selectedContradictionId || item.id !== selectedContradictionId)
               .map(item => {
                 const isSelected = selectedJustificationId === item.id;
                 return (
@@ -95,7 +95,7 @@ export default function ReliabilityPanel({
         </div>
       )}
 
-      {selectedContradictionId && selectedReliability && (
+      {selectedReliability && (
         <div className="bg-[#26150F] border border-amber-950/60 p-3.5 space-y-1 text-left font-sans text-xs animate-fadeIn">
           <span className="mono text-[8.5px] text-amber-500 font-bold uppercase tracking-widest block">
             CONSTRUCTED ARGUMENT SYNTHESIS
@@ -108,6 +108,8 @@ export default function ReliabilityPanel({
               
               let synthesisText = "";
               let isExactChain = false;
+
+              const mainName = mainItem ? mainItem.name : "[Select Primary Forensic Exhibit in Step 2]";
 
               if (selectedContradictionId === 'wa-ss' && selectedReliability === 'pressure') {
                 if (selectedJustificationId === 'cbi-logo') {
@@ -146,7 +148,7 @@ export default function ReliabilityPanel({
                   synthesisText = `Select a corroborating justification exhibit to override physical territorial boundaries.`;
                 }
               } else {
-                synthesisText = `Diagnosing ${rName} on ${mainItem?.name}. ${justificationItem ? `Corroborating factor linked via ${justificationItem.name}.` : 'Choose a corroborating exhibit to complete your statement.'}`;
+                synthesisText = `Diagnosing ${rName} with ${mainName}. ${justificationItem ? `Corroborating factor linked via ${justificationItem.name}.` : 'Choose a corroborating exhibit to complete your statement.'}`;
               }
 
               return (

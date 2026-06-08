@@ -38,8 +38,8 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        // Preserves the original testimony (facts remain stable) while layering uncertainty and hesitation
-        return `${originalText} ... [hesitates] ... I think.`;
+        // Preserves the original testimony (facts remain stable) but leaves silence and hesitation to speak for itself
+        return `${originalText} ... [hesitates] ...`;
       }
       return originalText;
     }
@@ -52,7 +52,8 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 60,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        return `System delay. Irrelevant. The Lucknow log is valid. Continue the transfer immediately.`; // Confident, simple, dismissive, scarier scammer
+        // Create investigative ambiguity (avoiding over-explaining with system delays)
+        return `The record is valid. Continue.`;
       }
       return originalText;
     }
