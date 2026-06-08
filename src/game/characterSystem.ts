@@ -38,8 +38,8 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        // Preserves the original testimony (facts remain stable) but leaves silence and hesitation to speak for itself
-        return `${originalText} ... [hesitates] ...`;
+        // Preserves the original testimony (facts remain stable) but leaves natural silence and pauses to speak for itself
+        return `${originalText} ...`;
       }
       return originalText;
     }

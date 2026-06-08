@@ -70,12 +70,12 @@ export const deriveCredibilityState = (
       if (isNegative) {
         integrityMatch = {
           score: 10,
-          message: `✗ Forensic Discrepancy: ${value}`
+          message: `✗ Discrepancy: ${value}`
         };
       } else {
-        const themeLabel = label.includes('medium') ? 'Material Integrity' : 
-                           (label.includes('coordinates') || label.includes('stamp') || label.includes('signature') || label.includes('seal')) ? 'Authenticity Signature' :
-                           'Forensic Signature';
+        const themeLabel = label.includes('medium') ? 'Material checks out' : 
+                           (label.includes('coordinates') || label.includes('stamp') || label.includes('signature') || label.includes('seal')) ? 'Authenticity confirmed' :
+                           'Forensic matches';
         integrityMatch = {
           score: 35,
           message: `✓ ${themeLabel}: ${value}`
@@ -87,10 +87,10 @@ export const deriveCredibilityState = (
       if (isNegative) {
         timelineMatch = {
           score: 15,
-          message: `✗ Spatiotemporal Gap: ${value}`
+          message: `✗ Temporal gap: ${value}`
         };
       } else {
-        const themeLabel = label.includes('status') ? 'Procedural Alignment' : 'Temporal Coherence';
+        const themeLabel = label.includes('status') ? 'Procedural match' : 'Timeline matches';
         timelineMatch = {
           score: 35,
           message: `✓ ${themeLabel}: ${value}`
@@ -104,7 +104,7 @@ export const deriveCredibilityState = (
     causes.push(integrityMatch.message);
     credibilityRating += integrityMatch.score;
   } else {
-    causes.push("✓ Forensic Signature: Basic capture metadata verified.");
+    causes.push("✓ Artifact matches capture metadata.");
     credibilityRating += 30;
   }
 
@@ -113,7 +113,7 @@ export const deriveCredibilityState = (
     causes.push(timelineMatch.message);
     credibilityRating += timelineMatch.score;
   } else {
-    causes.push("✓ Timeline Coherent: Temporal events match contextual trial history.");
+    causes.push("✓ Timeline matches contextual trial history.");
     credibilityRating += 30;
   }
 
@@ -125,28 +125,27 @@ export const deriveCredibilityState = (
   });
 
   if (corroboratingItem) {
-    causes.push(`✓ Independent Corroboration: Cross-referenced with verified Exhibit ${corroboratingItem.name} forming dual-link validity.`);
+    causes.push(`✓ Supported by another verified exhibit (${corroboratingItem.name})`);
     credibilityRating += 30;
   } else {
-    causes.push("✗ Source Isolation: Lacks cross-verified independent corroborating exhibit in current inventory.");
+    causes.push("✗ Lacks supporting corroboration in current inventory.");
     credibilityRating += 10;
   }
 
   // 4. Custody Chain Integrity (BSA Section 63 Certification State)
   if (evidence.hasBSACertificate) {
-    causes.push("✓ Custody Seal: Digital certificate of authenticity signed and verified under BSA Section 63.");
+    causes.push("✓ Certificate of authenticity verified under BSA Section 63.");
     admissibilityStrengthRating = 95; // High admissibility strength on certification
     credibilityRating += 15;
   } else {
-    causes.push("✗ Custody Unsealed: Digital evidence lacks the required certification under BSA Section 63.");
+    causes.push("✗ Lacks certificate of authenticity under BSA Section 63.");
     if (evidence.authenticity === AuthenticityStatus.VERIFIED) {
       admissibilityStrengthRating = 45; // Moderately stronger once verified
     }
   }
 
-  // Active courtroom interference penalties (e.g. pressure meter high-stress drops focus)
-  const pressurePenalty = pressureMeter > 50 ? 10 : 0;
-  const finalCredibility = Math.min(100, Math.max(10, credibilityRating - pressurePenalty));
+  // Active courtroom pressure affects interpretation difficulty rather than credibility scores directly
+  const finalCredibility = Math.min(100, Math.max(10, credibilityRating));
 
   return {
     credibility: finalCredibility,
