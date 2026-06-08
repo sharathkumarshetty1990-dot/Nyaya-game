@@ -138,7 +138,7 @@ export default function EvidencePanel({
   // mode === 'modal-selector'
   return (
     <div className="space-y-2">
-      <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">2. Select Forensic Exhibit (Evidence Evaluation)</div>
+      <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">2. SELECT FORENSIC EXHIBITS TO TEST THE THEORY (Forensic Verification)</div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[140px] overflow-y-auto pr-1">
         {inventory.map(item => {
           const isSelected = selectedContradictionId === item.id;

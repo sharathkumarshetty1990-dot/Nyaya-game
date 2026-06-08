@@ -38,8 +38,8 @@ export const CHARACTER_REGISTRY: Record<string, CharacterProfile> = {
     pressureTippingPoint: 45,
     getDynamicDialogue: (originalText, pressure) => {
       if (pressure > 75) {
-        // Distorts the original text to reflect true experienced uncertainty without explaining it
-        return `The call came shortly after lunch... ... I think.`;
+        // Preserves the original testimony (facts remain stable) while layering uncertainty and hesitation
+        return `${originalText} ... [hesitates] ... I think.`;
       }
       return originalText;
     }

@@ -34,26 +34,26 @@ export default function ReliabilityPanel({
     <div className="space-y-4 pt-3 border-t border-[#5A3D2D]/30">
       <div className="space-y-2">
         <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-          1. Evaluate Testimony Reliability (Reliability Interpretation)
+          1. COMMIT TO AN INTERPRETIVE THEORY (Diagnose Source of Doubt First)
         </div>
         <div className="grid grid-cols-2 gap-2">
           {reliabilityOptions.map(r => {
-            const isSel = selectedReliability === r.id;
-            return (
-              <button
-                type="button"
-                key={r.id}
-                onClick={() => onSelect(r.id as any)}
-                className={`p-2.5 text-left border-2 transition-all relative flex flex-col justify-center cursor-pointer ${
-                  isSel 
-                    ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)] bg-accent/20 border-accent/90' 
-                    : `${r.bg} ${r.color}`
-                }`}
-              >
-                <span className="font-bold text-[9px] tracking-wider block">{r.label}</span>
-                <span className="text-[7.5px] opacity-40 italic mt-0.5">{r.desc}</span>
-              </button>
-            );
+             const isSel = selectedReliability === r.id;
+             return (
+               <button
+                 type="button"
+                 key={r.id}
+                 onClick={() => onSelect(r.id as any)}
+                 className={`p-2.5 text-left border-2 transition-all relative flex flex-col justify-center cursor-pointer ${
+                   isSel 
+                     ? 'bg-[#2A1810] border-accent shadow-[4px_4px_0px_0px_rgba(218,61,44,0.15)] bg-accent/20 border-accent/90' 
+                     : `${r.bg} ${r.color}`
+                 }`}
+               >
+                 <span className="font-bold text-[9px] tracking-wider block">{r.label}</span>
+                 <span className="text-[7.5px] opacity-40 italic mt-0.5">{r.desc}</span>
+               </button>
+             );
           })}
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function ReliabilityPanel({
       {selectedContradictionId && selectedReliability && (
         <div className="space-y-2 pt-3 border-t border-[#5A3D2D]/30 animate-fadeIn">
           <div className="mono text-[9px] text-amber-500 uppercase tracking-widest font-bold">
-            2.1 Specify Corroborating Evidence (Justification)
+            2.1 Link Corroborating Evidence (Validate Theory)
           </div>
           <p className="text-[7.5px] text-amber-100/40 italic leading-snug">
             Choose an independent corroborating exhibit to complete the legal reasoning chain.

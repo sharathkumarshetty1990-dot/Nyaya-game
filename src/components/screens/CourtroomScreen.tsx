@@ -470,7 +470,7 @@ export default function CourtroomScreen({ gameState, setGameState, currentCase }
                                   <h4 className="mono font-bold text-amber-100 text-xl tracking-tighter uppercase leading-none">
                                     IMPEACHMENT INITIATION // ACTIVE DEDUCTION
                                   </h4>
-                                  <p className="text-[10px] text-amber-100/40 mono italic leading-none mt-1">Cross-examine the witness logs. Present contradicting exhibit from your inventory.</p>
+                                  <p className="text-[10px] text-amber-100/40 mono italic leading-none mt-1">Formulate your interpretive legal theory of doubt first, then select supporting forensic exhibits to test it.</p>
                                 </div>
                             </div>
                         </div>
